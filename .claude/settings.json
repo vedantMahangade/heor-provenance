@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:docs.ens.domains)",
+      "Bash(npx tsx -e ' *)",
+      "WebFetch(domain:www.4byte.directory)",
+      "Bash(curl -s \"https://www.4byte.directory/api/v1/signatures/?hex_signature=0x836588c9\")",
+      "Bash(npx --yes node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{try{const j=JSON.parse\\(d\\);console.log\\(j.results.map\\(r=>r.text_signature\\).join\\('\\\\n'\\)\\)}catch\\(e\\){console.log\\(d.slice\\(0,500\\)\\)}}\\)\")"
+    ]
+  }
+}
