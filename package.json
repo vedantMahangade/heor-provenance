@@ -10,7 +10,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "generate": "tsx scripts/generate.ts",
-    "smoke": "tsx scripts/smoke.ts"
+    "smoke": "tsx scripts/smoke.ts",
+    "store": "tsx scripts/store.ts"
   },
   "dependencies": {
     "fast-xml-parser": "^4.5.0",
