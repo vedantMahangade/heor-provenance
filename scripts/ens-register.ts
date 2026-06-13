@@ -1,19 +1,27 @@
 /**
- * Register a fresh .eth name directly via the on-chain ETHRegistrarController on
- * Sepolia, bypassing sepolia.app.ens.domains. Signs with ENS_PRIVATE_KEY (the
- * throwaway key that already holds Sepolia test ETH).
+ * Register a fresh .eth name on Sepolia via the ENS v2 TestnetV1PremigrationRegistrar.
+ * Signs with ENS_PRIVATE_KEY (the throwaway key that holds Sepolia test ETH).
  *
- *   npm run ens-register            # registers ENS_REGISTER_LABEL.eth for 1 year
+ *   npm run ens-register              # registers ENS_REGISTER_LABEL.eth for 1 year
+ *   npm run ens-register -- --dry-run # simulate only, send no transaction
  *
- * Two incompatible controller ABIs exist on Sepolia:
- *   - STRUCT (canonical, default 0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968):
- *       register((string label,address owner,uint256 duration,bytes32 secret,
- *                 address resolver,bytes[] data,uint8 reverseRecord,bytes32 referrer))
- *   - LEGACY v1 (older address, likely disabled under the v2 system):
- *       register(string,address,uint256,bytes32,address,bytes[],bool,uint16)
- * We auto-detect which one the configured ENS_CONTROLLER_ADDRESS exposes by probing
- * its pure makeCommitment(), then drive the matching commit -> wait -> register flow.
- * Any revert (e.g. a disabled v1 controller) is simulated first so its reason prints.
+ * ── Why this is not the classic commit→register flow ────────────────────────
+ * Under ENS's v2 migration on Sepolia (latest contract redeploy ~May 2026) the
+ * old ETHRegistrarController (0xfb3cE5D0…F1f968, and earlier ones) were
+ * DE-AUTHORIZED on the BaseRegistrar: commit() still succeeds (it only stores a
+ * hash) but register() reverts because the controller can no longer mint on the
+ * BaseRegistrar. The docs/ens-contracts repo still list that dead address.
+ *
+ * The contract that IS authorized to mint fresh .eth names is the
+ * `TestnetV1PremigrationRegistrar` (0xdf60C561…477078). It takes the SAME
+ * Registration struct as the old struct controller but with NO commit step,
+ * NO availability/rentPrice getters, and (currently) NO fee — a single payable
+ * register() call. We verified its wiring: ENS_REGISTRY is the canonical
+ * 0x0000…2e1e and owner(namehash("eth")) is still the BaseRegistrar, so a name
+ * minted here resolves through standard viem getEnsText — the demo read path is
+ * unchanged. Availability is still checked on the BaseRegistrar's
+ * available(uint256 labelhash). To rediscover the active registrar if it moves
+ * again, run scripts/ens-find-controller.ts (replays ControllerAdded events).
  *
  * The resolver is set to the Sepolia PublicResolver during registration, so after
  * this you can go straight to `npm run ens-write` (no ens-set-resolver needed).
@@ -28,6 +36,8 @@ import {
   createPublicClient,
   createWalletClient,
   http,
+  keccak256,
+  stringToHex,
   toHex,
   zeroHash,
   type Address,
@@ -38,195 +48,60 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 
-const DEFAULT_CONTROLLER: Address =
-  "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968";
-const DEFAULT_PUBLIC_RESOLVER: Address =
-  "0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5";
+// Active ENS v2 registrar on Sepolia (TestnetV1PremigrationRegistrar). Override
+// via ENS_CONTROLLER_ADDRESS if a future redeploy moves it (find the new one with
+// scripts/ens-find-controller.ts).
+const DEFAULT_REGISTRAR: Address = "0xdf60C561Ca35AD3C89D24BbA854654b1c3477078";
+const DEFAULT_PUBLIC_RESOLVER: Address = "0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5";
+const BASE_REGISTRAR: Address = "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85";
 
 const SECONDS_PER_YEAR = 365n * 24n * 60n * 60n; // 31536000
 
 // ── ABIs ──────────────────────────────────────────────────────────────────
-// Custom errors thrown by the ETHRegistrarController. Including these in the ABI
-// lets viem decode an otherwise reason-less revert into a NAMED error. The struct
-// (v2-era) and legacy v1 controllers declare DIFFERENT signatures for the same
-// names (e.g. CommitmentTooNew takes 3 args on the struct controller but 1 on the
-// legacy one), so they cannot share one list — viem would see an ambiguous ABI.
-//
-// STRUCT errors mirror the deployed Sepolia controller's ABI exactly
-// (ensdomains/ens-contracts deployments/sepolia/ETHRegistrarController.json).
-const STRUCT_ERRORS = [
-  { type: "error", name: "CommitmentNotFound", inputs: [{ name: "commitment", type: "bytes32" }] },
-  {
-    type: "error",
-    name: "CommitmentTooNew",
-    inputs: [
-      { name: "commitment", type: "bytes32" },
-      { name: "minimumCommitmentTimestamp", type: "uint256" },
-      { name: "currentTimestamp", type: "uint256" },
-    ],
-  },
-  {
-    type: "error",
-    name: "CommitmentTooOld",
-    inputs: [
-      { name: "commitment", type: "bytes32" },
-      { name: "maximumCommitmentTimestamp", type: "uint256" },
-      { name: "currentTimestamp", type: "uint256" },
-    ],
-  },
+// Custom errors known to surface from the registrar / BaseRegistrar. Including
+// them lets viem decode an otherwise reason-less revert into a NAMED error.
+const REGISTRAR_ERRORS = [
+  { type: "error", name: "NameNotAvailable", inputs: [{ name: "name", type: "string" }] },
   { type: "error", name: "DurationTooShort", inputs: [{ name: "duration", type: "uint256" }] },
   { type: "error", name: "InsufficientValue", inputs: [] },
-  { type: "error", name: "MaxCommitmentAgeTooHigh", inputs: [] },
-  { type: "error", name: "MaxCommitmentAgeTooLow", inputs: [] },
-  { type: "error", name: "NameNotAvailable", inputs: [{ name: "name", type: "string" }] },
+  { type: "error", name: "ResolverRequiredWhenDataSupplied", inputs: [] },
   { type: "error", name: "ResolverRequiredForReverseRecord", inputs: [] },
-  { type: "error", name: "ResolverRequiredWhenDataSupplied", inputs: [] },
-  { type: "error", name: "UnexpiredCommitmentExists", inputs: [{ name: "commitment", type: "bytes32" }] },
-] as const;
-
-// LEGACY v1 controller errors (classic single-arg commitment errors + Unauthorised).
-const LEGACY_ERRORS = [
-  { type: "error", name: "CommitmentTooNew", inputs: [{ name: "commitment", type: "bytes32" }] },
-  { type: "error", name: "CommitmentTooOld", inputs: [{ name: "commitment", type: "bytes32" }] },
-  { type: "error", name: "NameNotAvailable", inputs: [{ name: "name", type: "string" }] },
-  { type: "error", name: "DurationTooShort", inputs: [{ name: "duration", type: "uint256" }] },
-  { type: "error", name: "ResolverRequiredWhenDataSupplied", inputs: [] },
-  { type: "error", name: "UnexpiredCommitmentExists", inputs: [{ name: "commitment", type: "bytes32" }] },
-  { type: "error", name: "InsufficientValue", inputs: [] },
   { type: "error", name: "Unauthorised", inputs: [{ name: "node", type: "bytes32" }] },
-  { type: "error", name: "MaxCommitmentAgeTooLow", inputs: [] },
-  { type: "error", name: "MaxCommitmentAgeTooHigh", inputs: [] },
 ] as const;
 
-// Shared read-only fragments live on both controller versions.
-const SHARED_ABI = [
+const REGISTRAR_ABI = [
+  ...REGISTRAR_ERRORS,
+  {
+    type: "function",
+    name: "register",
+    stateMutability: "payable",
+    inputs: [
+      {
+        name: "registration",
+        type: "tuple",
+        components: [
+          { name: "label", type: "string" },
+          { name: "owner", type: "address" },
+          { name: "duration", type: "uint256" },
+          { name: "secret", type: "bytes32" },
+          { name: "resolver", type: "address" },
+          { name: "data", type: "bytes[]" },
+          { name: "reverseRecord", type: "uint8" },
+          { name: "referrer", type: "bytes32" },
+        ],
+      },
+    ],
+    outputs: [],
+  },
+] as const;
+
+const BASE_REGISTRAR_ABI = [
   {
     type: "function",
     name: "available",
     stateMutability: "view",
-    inputs: [{ name: "name", type: "string" }],
+    inputs: [{ name: "id", type: "uint256" }],
     outputs: [{ name: "", type: "bool" }],
-  },
-  {
-    type: "function",
-    name: "rentPrice",
-    stateMutability: "view",
-    inputs: [
-      { name: "name", type: "string" },
-      { name: "duration", type: "uint256" },
-    ],
-    outputs: [
-      {
-        name: "price",
-        type: "tuple",
-        components: [
-          { name: "base", type: "uint256" },
-          { name: "premium", type: "uint256" },
-        ],
-      },
-    ],
-  },
-  {
-    type: "function",
-    name: "minCommitmentAge",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ name: "", type: "uint256" }],
-  },
-  {
-    type: "function",
-    name: "commit",
-    stateMutability: "nonpayable",
-    inputs: [{ name: "commitment", type: "bytes32" }],
-    outputs: [],
-  },
-] as const;
-
-// Canonical v2-era controller: single struct arg, uint8 reverseRecord, bytes32 referrer.
-const STRUCT_CONTROLLER_ABI = [
-  ...SHARED_ABI,
-  ...STRUCT_ERRORS,
-  {
-    type: "function",
-    name: "makeCommitment",
-    stateMutability: "pure",
-    inputs: [
-      {
-        name: "registration",
-        type: "tuple",
-        components: [
-          { name: "label", type: "string" },
-          { name: "owner", type: "address" },
-          { name: "duration", type: "uint256" },
-          { name: "secret", type: "bytes32" },
-          { name: "resolver", type: "address" },
-          { name: "data", type: "bytes[]" },
-          { name: "reverseRecord", type: "uint8" },
-          { name: "referrer", type: "bytes32" },
-        ],
-      },
-    ],
-    outputs: [{ name: "", type: "bytes32" }],
-  },
-  {
-    type: "function",
-    name: "register",
-    stateMutability: "payable",
-    inputs: [
-      {
-        name: "registration",
-        type: "tuple",
-        components: [
-          { name: "label", type: "string" },
-          { name: "owner", type: "address" },
-          { name: "duration", type: "uint256" },
-          { name: "secret", type: "bytes32" },
-          { name: "resolver", type: "address" },
-          { name: "data", type: "bytes[]" },
-          { name: "reverseRecord", type: "uint8" },
-          { name: "referrer", type: "bytes32" },
-        ],
-      },
-    ],
-    outputs: [],
-  },
-] as const;
-
-// Legacy v1 controller: positional args, bool reverseRecord, uint16 ownerControlledFuses.
-const LEGACY_CONTROLLER_ABI = [
-  ...SHARED_ABI,
-  ...LEGACY_ERRORS,
-  {
-    type: "function",
-    name: "makeCommitment",
-    stateMutability: "pure",
-    inputs: [
-      { name: "name", type: "string" },
-      { name: "owner", type: "address" },
-      { name: "duration", type: "uint256" },
-      { name: "secret", type: "bytes32" },
-      { name: "resolver", type: "address" },
-      { name: "data", type: "bytes[]" },
-      { name: "reverseRecord", type: "bool" },
-      { name: "ownerControlledFuses", type: "uint16" },
-    ],
-    outputs: [{ name: "", type: "bytes32" }],
-  },
-  {
-    type: "function",
-    name: "register",
-    stateMutability: "payable",
-    inputs: [
-      { name: "name", type: "string" },
-      { name: "owner", type: "address" },
-      { name: "duration", type: "uint256" },
-      { name: "secret", type: "bytes32" },
-      { name: "resolver", type: "address" },
-      { name: "data", type: "bytes[]" },
-      { name: "reverseRecord", type: "bool" },
-      { name: "ownerControlledFuses", type: "uint16" },
-    ],
-    outputs: [],
   },
 ] as const;
 
@@ -242,9 +117,6 @@ function requireEnv(name: string): string {
 }
 
 function revertReason(err: unknown): string {
-  // Dig the decoded custom error out of viem's nested error chain so we print the
-  // NAMED error (e.g. "CommitmentNotFound(0x…)") rather than the generic outer
-  // "the contract function reverted" message or a raw 4-byte signature.
   if (err instanceof BaseError) {
     const revert = err.walk((e) => e instanceof ContractFunctionRevertedError);
     if (revert instanceof ContractFunctionRevertedError) {
@@ -255,7 +127,6 @@ function revertReason(err: unknown): string {
           ? `${name}(${args.map((a) => String(a)).join(", ")})`
           : `${name}()`;
       }
-      // Selector didn't match any ABI error — surface the raw signature.
       if (revert.signature) return `undecoded custom error ${revert.signature}`;
       return revert.shortMessage;
     }
@@ -267,10 +138,6 @@ function revertReason(err: unknown): string {
   return String(err);
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 async function main() {
   const dryRun =
     process.argv.slice(2).includes("--dry-run") ||
@@ -280,11 +147,10 @@ async function main() {
   const rpcUrl = requireEnv("SEPOLIA_RPC_URL");
   const rawKey = requireEnv("ENS_PRIVATE_KEY");
 
-  const controller =
-    (process.env.ENS_CONTROLLER_ADDRESS as Address) ?? DEFAULT_CONTROLLER;
+  const registrar =
+    (process.env.ENS_CONTROLLER_ADDRESS as Address) ?? DEFAULT_REGISTRAR;
   const resolver =
-    (process.env.ENS_PUBLIC_RESOLVER_ADDRESS as Address) ??
-    DEFAULT_PUBLIC_RESOLVER;
+    (process.env.ENS_PUBLIC_RESOLVER_ADDRESS as Address) ?? DEFAULT_PUBLIC_RESOLVER;
   const years = BigInt(process.env.ENS_REGISTER_DURATION_YEARS || "1");
   const duration = years * SECONDS_PER_YEAR;
 
@@ -297,8 +163,8 @@ async function main() {
     process.exit(1);
   }
 
-  const secret = toHex(randomBytes(32));
   const name = `${label}.eth`;
+  const secret = toHex(randomBytes(32));
 
   const publicClient: PublicClient = createPublicClient({
     chain: sepolia,
@@ -310,26 +176,24 @@ async function main() {
     transport: http(rpcUrl),
   });
 
-  console.error(`> Registering "${name}" directly via ETHRegistrarController on Sepolia`);
-  console.error(`  controller: ${controller}`);
-  console.error(`  resolver:   ${resolver}`);
-  console.error(`  owner:      ${account.address}`);
-  console.error(`  duration:   ${years} year(s) (${duration}s)\n`);
+  console.error(`> Registering "${name}" via ENS v2 registrar on Sepolia (single tx, no commit)`);
+  console.error(`  registrar: ${registrar}`);
+  console.error(`  resolver:  ${resolver}`);
+  console.error(`  owner:     ${account.address}`);
+  console.error(`  duration:  ${years} year(s) (${duration}s)\n`);
 
-  // 1. Availability.
+  // 1. Availability — checked on the BaseRegistrar via available(uint256 labelhash).
+  const labelId = BigInt(keccak256(stringToHex(label)));
   let available: boolean;
   try {
     available = (await publicClient.readContract({
-      address: controller,
-      abi: SHARED_ABI,
+      address: BASE_REGISTRAR,
+      abi: BASE_REGISTRAR_ABI,
       functionName: "available",
-      args: [label],
+      args: [labelId],
     })) as boolean;
   } catch (err) {
-    console.error(
-      `Error: could not call available() on the controller at ${controller}. ` +
-        `Is ENS_CONTROLLER_ADDRESS correct?\nUnderlying: ${revertReason(err)}`,
-    );
+    console.error(`Error: could not check availability on the BaseRegistrar.\nUnderlying: ${revertReason(err)}`);
     process.exit(1);
   }
   if (!available) {
@@ -338,8 +202,8 @@ async function main() {
   }
   console.error(`  ✓ "${name}" is available`);
 
-  // 2. Auto-detect the ABI shape via the pure makeCommitment().
-  const structArg = {
+  // 2. Build the Registration struct (no commit step under the v2 registrar).
+  const registration = {
     label,
     owner: account.address,
     duration,
@@ -349,171 +213,63 @@ async function main() {
     reverseRecord: 0,
     referrer: zeroHash,
   };
-  const legacyArgs = [
-    label,
-    account.address,
-    duration,
-    secret,
-    resolver,
-    [] as Hex[],
-    false,
-    0,
-  ] as const;
 
-  let mode: "struct" | "legacy";
-  let commitment: Hex;
-  try {
-    commitment = (await publicClient.readContract({
-      address: controller,
-      abi: STRUCT_CONTROLLER_ABI,
-      functionName: "makeCommitment",
-      args: [structArg],
-    })) as Hex;
-    mode = "struct";
-  } catch {
-    try {
-      commitment = (await publicClient.readContract({
-        address: controller,
-        abi: LEGACY_CONTROLLER_ABI,
-        functionName: "makeCommitment",
-        args: legacyArgs,
-      })) as Hex;
-      mode = "legacy";
-    } catch (err) {
-      console.error(
-        `Error: controller at ${controller} exposes neither the struct nor the legacy ` +
-          `makeCommitment ABI. Check ENS_CONTROLLER_ADDRESS.\nUnderlying: ${revertReason(err)}`,
-      );
-      process.exit(1);
-      return;
-    }
-  }
-  const abi = mode === "struct" ? STRUCT_CONTROLLER_ABI : LEGACY_CONTROLLER_ABI;
-  console.error(`  ✓ detected ${mode} controller ABI`);
-  console.error(`  commitment: ${commitment}`);
+  // The registrar has no rentPrice getter and currently charges no fee; send 0.
+  // Override via ENS_REGISTER_VALUE_WEI if a future deploy reintroduces a fee.
+  const value = BigInt(process.env.ENS_REGISTER_VALUE_WEI || "0");
 
-  // 3. Price (base + premium), sent with a 10% buffer for USD->ETH drift.
-  const price = (await publicClient.readContract({
-    address: controller,
-    abi: SHARED_ABI,
-    functionName: "rentPrice",
-    args: [label, duration],
-  })) as { base: bigint; premium: bigint };
-  const cost = price.base + price.premium;
-  const value = (cost * 11n) / 10n;
-  console.error(`  rentPrice:  ${cost} wei (sending ${value} wei with buffer)\n`);
-
-  const registerArgs = mode === "struct" ? [structArg] : legacyArgs;
-
-  // Dry-run: ONLY simulate register() with the custom-error ABI so viem decodes
-  // any revert into a named error. Sends no transaction (no commit either).
-  if (dryRun) {
-    console.error(`> Dry-run: simulating register() only (no transaction sent)`);
-    try {
-      await publicClient.simulateContract({
-        account,
-        address: controller,
-        abi,
-        functionName: "register",
-        args: registerArgs as never,
-        value,
-      });
-      console.error(`  ✓ register() simulation succeeded — no revert.`);
-      console.error(
-        `    (Note: a real run still needs commit() + ${"minCommitmentAge"} wait first.)`,
-      );
-    } catch (err) {
-      console.error(`  register() reverts with:\n    ${revertReason(err)}`);
-      console.error(
-        `\n  Note: with no on-chain commitment for this run's random secret, the expected\n` +
-          `  revert here is CommitmentNotFound — that confirms the args reach the\n` +
-          `  commitment-consumption step cleanly. To decode the revert from a real\n` +
-          `  attempt, run the full flow — its register simulation uses this same\n` +
-          `  custom-error ABI and prints the named error before sending any tx.`,
-      );
-    }
-    return;
-  }
-
-  // 4. Commit.
-  console.error(`> Step 1/2: commit`);
-  let commitHash: Hex;
-  try {
-    commitHash = await walletClient.writeContract({
-      account,
-      chain: sepolia,
-      address: controller,
-      abi,
-      functionName: "commit",
-      args: [commitment],
-    });
-  } catch (err) {
-    console.error(`commit() failed.\nRevert reason: ${revertReason(err)}`);
-    process.exit(1);
-  }
-  console.error(`  tx sent: ${commitHash}`);
-  const commitReceipt = await publicClient.waitForTransactionReceipt({ hash: commitHash });
-  if (commitReceipt.status !== "success") {
-    console.error(`commit reverted on-chain. tx: ${commitHash}`);
-    process.exit(1);
-  }
-  console.error(`  ✓ committed`);
-
-  // 5. Wait the minimum commitment age (+5s buffer).
-  const minAge = (await publicClient.readContract({
-    address: controller,
-    abi: SHARED_ABI,
-    functionName: "minCommitmentAge",
-  })) as bigint;
-  const waitSecs = Number(minAge) + 5;
-  console.error(`  waiting ${waitSecs}s for minimum commitment age…`);
-  await sleep(waitSecs * 1000);
-
-  // 6. Register: simulate first so a disabled-controller revert surfaces its reason.
-  console.error(`\n> Step 2/2: register`);
+  // 3. Simulate first so any revert surfaces a NAMED reason before we spend gas.
+  console.error(`\n> Simulating register() (value ${value} wei)…`);
   try {
     await publicClient.simulateContract({
       account,
-      address: controller,
-      abi,
+      address: registrar,
+      abi: REGISTRAR_ABI,
       functionName: "register",
-      args: registerArgs as never,
+      args: [registration],
       value,
     });
+    console.error(`  ✓ simulation OK`);
   } catch (err) {
     console.error(`register() would revert.\nRevert reason: ${revertReason(err)}`);
     process.exit(1);
   }
 
-  let registerHash: Hex;
+  if (dryRun) {
+    console.error(`\n> Dry-run: simulation passed, no transaction sent.`);
+    return;
+  }
+
+  // 4. Send the single register transaction.
+  console.error(`\n> Sending register()…`);
+  let txHash: Hex;
   try {
-    registerHash = await walletClient.writeContract({
+    txHash = await walletClient.writeContract({
       account,
       chain: sepolia,
-      address: controller,
-      abi,
+      address: registrar,
+      abi: REGISTRAR_ABI,
       functionName: "register",
-      args: registerArgs as never,
+      args: [registration],
       value,
     });
   } catch (err) {
     console.error(`register() failed.\nRevert reason: ${revertReason(err)}`);
     process.exit(1);
   }
-  console.error(`  tx sent: ${registerHash}`);
-  const registerReceipt = await publicClient.waitForTransactionReceipt({ hash: registerHash });
-  if (registerReceipt.status !== "success") {
-    console.error(`register reverted on-chain. tx: ${registerHash}`);
+  console.error(`  tx sent: ${txHash}`);
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+  if (receipt.status !== "success") {
+    console.error(`register reverted on-chain. tx: ${txHash}`);
     process.exit(1);
   }
 
   console.error(`\n✓ Registered "${name}" for ${years} year(s).`);
   console.error(`  owner:    ${account.address}`);
   console.error(`  resolver: ${resolver} (set during registration)`);
-  console.error(`  commit:   ${commitHash}`);
-  console.error(`  register: ${registerHash}`);
+  console.error(`  register: ${txHash}`);
   console.error(`\nNext: set ENS_NAME=${name} in .env, then run: npm run ens-write -- --blob <blobId>`);
-  console.log(registerHash);
+  console.log(txHash);
 }
 
 main().catch((err) => {
