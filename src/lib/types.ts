@@ -50,6 +50,23 @@ export interface DossierQuery {
 }
 
 /**
+ * Optional provenance record from a confidential-enclave analysis (Chainlink
+ * Confidential AI Attester). Attests that an LLM ran over a specific document
+ * inside a trusted AWS Nitro enclave, binding the content/request/response with
+ * enclave-signed digests — an independent anchor alongside our own sha256.
+ * Produced by src/lib/confidential.ts; see buildConfidentialAttestation().
+ */
+export interface ConfidentialAttestation {
+  provider: "chainlink-confidential-ai";
+  model: string;
+  enclave: "aws-nitro";
+  contentDigest: string;
+  requestDigest: string;
+  responseDigest: string;
+  output: string;
+}
+
+/**
  * The self-contained, content-addressed evidence bundle.
  *
  * `sha256` is computed over the canonical JSON of every field EXCEPT sha256
@@ -64,6 +81,11 @@ export interface EvidenceBundle {
   version: string;
   /** ISO-8601 UTC timestamp. */
   timestamp: string;
+  /**
+   * Optional confidential-enclave attestation over a source document. When
+   * present it is part of the content-addressed bundle (included in sha256).
+   */
+  confidentialAttestation?: ConfidentialAttestation;
   /** Hex sha256 of the canonical bundle (all fields except this one). */
   sha256: string;
 }

@@ -33,26 +33,25 @@ async function main() {
   const CHUNK = 50000n;
   const SPAN = 250000n; // ~35 days back, covers the May-2026 redeploy
   const start = tip > SPAN ? tip - SPAN : 0n;
-  const addLogs: Awaited<ReturnType<typeof client.getLogs>> = [];
-  const remLogs: Awaited<ReturnType<typeof client.getLogs>> = [];
+  // controller -> last event block touching it (added OR removed).
+  const seen = new Map<string, bigint>();
+  const note = (ctrl: string | undefined, block: bigint | null) => {
+    if (!ctrl) return;
+    const b = block ?? 0n;
+    const prev = seen.get(ctrl);
+    if (prev === undefined || b >= prev) seen.set(ctrl, b);
+  };
+
   for (let from = start; from <= tip; from += CHUNK) {
     const to = from + CHUNK - 1n > tip ? tip : from + CHUNK - 1n;
     const [a, r] = await Promise.all([
       client.getLogs({ address: BASE_REGISTRAR, event: added, fromBlock: from, toBlock: to }),
       client.getLogs({ address: BASE_REGISTRAR, event: removed, fromBlock: from, toBlock: to }),
     ]);
-    addLogs.push(...a);
-    remLogs.push(...r);
+    for (const l of a) note(l.args.controller, l.blockNumber);
+    for (const l of r) note(l.args.controller, l.blockNumber);
   }
   console.log(`Scanned blocks ${start}..${tip} for Controller events.\n`);
-
-  const seen = new Map<string, bigint>(); // controller -> last event block
-  for (const l of addLogs) seen.set(l.args.controller as string, l.blockNumber!);
-  for (const l of remLogs) {
-    const b = l.blockNumber!;
-    const prev = seen.get(l.args.controller as string);
-    if (prev === undefined || b >= prev) seen.set(l.args.controller as string, b);
-  }
 
   console.log(`Controllers ever touched on BaseRegistrar (${seen.size}):\n`);
   for (const ctrl of seen.keys()) {

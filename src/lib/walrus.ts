@@ -24,6 +24,11 @@ function getAggregator(): string {
   return (process.env.WALRUS_AGGREGATOR ?? TESTNET_AGGREGATOR).replace(/\/+$/, "");
 }
 
+/** Public aggregator URL for a blob — the exact URL readBlob() fetches. */
+export function blobUrl(blobId: string): string {
+  return `${getAggregator()}/v1/blobs/${blobId}`;
+}
+
 /** Shape of the publisher's store response (only the parts we read). */
 interface StoreResponse {
   newlyCreated?: { blobObject?: { blobId?: string } };
@@ -79,7 +84,7 @@ export async function readBlob(
   blobId: string,
   { maxAttempts = 5, baseDelayMs = 1000 }: ReadOptions = {},
 ): Promise<string> {
-  const url = `${getAggregator()}/v1/blobs/${blobId}`;
+  const url = blobUrl(blobId);
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const res = await fetch(url);

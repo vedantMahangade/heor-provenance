@@ -110,14 +110,13 @@ function getRegistryAddress(): Address {
   return (process.env.ENS_REGISTRY_ADDRESS as Address) ?? DEFAULT_ENS_REGISTRY;
 }
 
+// Public Sepolia endpoint used when SEPOLIA_RPC_URL is unset, so reads (ENS
+// resolution for the keyless Verify demo) work on a clean clone with no env.
+// Writes still want a dedicated RPC, but writes are gated behind keys anyway.
+const DEFAULT_PUBLIC_SEPOLIA_RPC = "https://ethereum-sepolia-rpc.publicnode.com";
+
 function requireRpcUrl(): string {
-  const rpc = process.env.SEPOLIA_RPC_URL;
-  if (!rpc) {
-    throw new Error(
-      "SEPOLIA_RPC_URL is not set. Add a Sepolia JSON-RPC endpoint to .env.",
-    );
-  }
-  return rpc;
+  return process.env.SEPOLIA_RPC_URL || DEFAULT_PUBLIC_SEPOLIA_RPC;
 }
 
 function requireEnsName(explicit?: string): string {

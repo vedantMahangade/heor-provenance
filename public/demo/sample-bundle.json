@@ -1,0 +1,170 @@
+{
+  "verified": true,
+  "hashMatch": true,
+  "ensName": "heor-prov.eth",
+  "blobId": "AoWrV993BSsOJ0sq8FkjPyF1AyvSDVbE5ZYk9EEo_yA",
+  "resolver": "0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5",
+  "records": {
+    "heor.dossier.latest": "AoWrV993BSsOJ0sq8FkjPyF1AyvSDVbE5ZYk9EEo_yA",
+    "heor.agent.version": "heor-provenance/0.1.0",
+    "heor.agent.capabilities": "pubmed-grounded-drafting,claim-level-verification,walrus-storage,sha256-provenance,confidential-ai-attestation"
+  },
+  "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space/v1/blobs/AoWrV993BSsOJ0sq8FkjPyF1AyvSDVbE5ZYk9EEo_yA",
+  "dossier": {
+    "query": {
+      "drug": "semaglutide",
+      "indication": "type 2 diabetes"
+    },
+    "claims": [
+      {
+        "id": "claim-1",
+        "text": "Semaglutide consistently demonstrated superior and sustained glycemic control and weight loss compared to all evaluated comparators.",
+        "pmid": "30615985",
+        "supportingSentence": "Semaglutide consistently demonstrated superior and sustained glycemic control and weight loss vs. all comparators evaluated.",
+        "status": "grounded"
+      },
+      {
+        "id": "claim-2",
+        "text": "Semaglutide was superior to dulaglutide in improving glycemic control and reducing body weight at both low and high doses.",
+        "pmid": "29397376",
+        "supportingSentence": "At low and high doses, semaglutide was superior to dulaglutide in improving glycaemic control and reducing bodyweight, enabling a significantly greater number of patients with type 2 diabetes to achieve clinically meaningful glycaemic targets and weight loss, with a similar safety profile.",
+        "status": "grounded"
+      },
+      {
+        "id": "claim-3",
+        "text": "Semaglutide reduced HbA1c by 1.01% and 1.38% compared to placebo at doses of 0.5 mg and 1 mg, respectively.",
+        "pmid": "29756388",
+        "supportingSentence": "Compared with placebo, subcutaneous semaglutide 0.5 and 1 mg reduced HbA1c by 1.01% (95% CI, 0.56-1.47) and 1.38% (1.05-1.70), respectively.",
+        "status": "grounded"
+      },
+      {
+        "id": "claim-4",
+        "text": "Semaglutide was associated with a significantly reduced risk of first-time Alzheimer's disease diagnosis compared to other antidiabetic medications.",
+        "pmid": "39445596",
+        "supportingSentence": "Semaglutide was associated with significantly reduced risk for first-time AD diagnosis, most strongly compared with insulin (hazard ratio [HR], 0.33 [95% CI: 0.21 to 0.51]) and most weakly compared with other GLP-1RAs (HR, 0.59 [95% CI: 0.37 to 0.95]).",
+        "status": "grounded"
+      },
+      {
+        "id": "claim-5",
+        "text": "Semaglutide was not associated with an increased risk of diabetic retinopathy compared to controls when all trials were combined.",
+        "pmid": "34894326",
+        "supportingSentence": "Overall, semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33).",
+        "status": "grounded"
+      }
+    ],
+    "sources": [
+      {
+        "pmid": "30615985",
+        "title": "Comparative efficacy, safety, and cardiovascular outcomes with once-weekly subcutaneous semaglutide in the treatment of type 2 diabetes: Insights from the SUSTAIN 1-7 trials.",
+        "abstract": "In individuals with type 2 diabetes, glycaemic control and cardiovascular risk factor management reduces the likelihood of late-stage diabetic complications. Guidelines recommend treatment goals targeting HbA, body weight, blood pressure, and low-density lipoprotein cholesterol. Development of new treatments for type 2 diabetes requires an understanding of their mechanism and efficacy, as well as their relative effects compared to other treatment choices, plus demonstration of cardiovascular safety. Subcutaneous semaglutide is a glucagon-like peptide-1 receptor agonist currently approved in several countries for once-weekly treatment of type 2 diabetes. Semaglutide works via the incretin pathway, stimulating insulin and inhibiting glucagon secretion from the pancreatic islets, leading to lower blood glucose levels. Semaglutide also decreases energy intake by reducing appetite and food cravings, and lowering relative preference for fatty, energy-dense foods. Semaglutide was evaluated in the SUSTAIN clinical trial programme in over 8000 patients across the spectrum of type 2 diabetes. This review details the efficacy and safety profile of semaglutide in the SUSTAIN 1-5 and 7 trials, and its cardiovascular safety profile in the SUSTAIN 6 trial. Semaglutide consistently demonstrated superior and sustained glycemic control and weight loss vs. all comparators evaluated. In SUSTAIN 6, involving patients at high risk of cardiovascular disease, semaglutide significantly decreased the occurrence of cardiovascular events compared with placebo/standard of care (hazard ratio 0.74, P&#x2009;<&#x2009;0.001 for non-inferiority). Through a comprehensive phase 3 clinical trial program, we have a detailed understanding of semaglutide's efficacy, safety, cardiovascular effects and comparative role in the treatment of type 2 diabetes.",
+        "journal": "Diabetes & metabolism",
+        "year": "2019",
+        "authors": [
+          "Aroda VR",
+          "Ahmann A",
+          "Cariou B",
+          "Chow F",
+          "Davies MJ",
+          "J&#xf3;dar E",
+          "Mehta R",
+          "Woo V",
+          "Lingvay I"
+        ],
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30615985/"
+      },
+      {
+        "pmid": "29397376",
+        "title": "Semaglutide versus dulaglutide once weekly in patients with type 2 diabetes (SUSTAIN 7): a randomised, open-label, phase 3b trial.",
+        "abstract": "BACKGROUND: Despite common mechanisms of actions, glucagon-like peptide-1 receptor agonists differ in structure, pharmacokinetic profile, and clinical effects. This head-to-head trial compared semaglutide with dulaglutide in patients with inadequately controlled type 2 diabetes. METHODS: This was an open-label, parallel-group, phase 3b trial done at 194 hospitals, clinical institutions or private practices in 16 countries. Eligible patients were aged 18 years or older and had type 2 diabetes with HbA7&#xb7;0-10&#xb7;5% (53&#xb7;0-91&#xb7;0 mmol/mol) on metformin monotherapy. Patients were randomly assigned (1:1:1:1) by use of an interactive web-response system to once a week treatment with either semaglutide 0&#xb7;5 mg, dulaglutide 0&#xb7;75 mg, semaglutide 1&#xb7;0 mg, or dulaglutide 1&#xb7;5 mg subcutaneously. The primary endpoint was change from baseline in percentage HbA; the confirmatory secondary endpoint was change in bodyweight, both at week 40. The primary analysis population included all randomly assigned patients exposed to at least one dose of trial product obtained while on treatment and before the onset of rescue medication. The safety population included all randomly assigned patients exposed to at least one dose of trial product obtained while on treatment. The trial was powered for HbAnon-inferiority (margin 0&#xb7;4%) and bodyweight superiority. This trial is registered with ClinicalTrials.gov, number NCT02648204. FINDINGS: Between Jan 6, 2016, and June 22, 2016, 1201 patients were randomly assigned to treatment; of these, 301 were exposed to semaglutide 0&#xb7;5 mg, 299 to dulaglutide 0&#xb7;75 mg, 300 to semaglutide 1&#xb7;0 mg, and 299 to dulaglutide 1&#xb7;5 mg. 72 (6%) patients withdrew from the trial (22 receiving semaglutide 0&#xb7;5 mg, 13 receiving dulaglutide 0&#xb7;75 mg, 21 receiving semaglutide 1&#xb7;0 mg, and 16 receiving dulaglutide 1&#xb7;5 mg). From overall baseline mean, mean percentage HbAwas reduced by 1&#xb7;5 (SE 0&#xb7;06) percentage points with semaglutide 0&#xb7;5 mg versus 1&#xb7;1 (0&#xb7;05) percentage points with dulaglutide 0&#xb7;75 mg (estimated treatment difference [ETD] -0&#xb7;40 percentage points [95% CI -0&#xb7;55 to -0&#xb7;25]; p<0&#xb7;0001) and by 1&#xb7;8 (0&#xb7;06) percentage points with semaglutide 1&#xb7;0 mg versus 1&#xb7;4 (0&#xb7;06) percentage points with dulaglutide 1&#xb7;5 mg (ETD -0&#xb7;41 percentage points [-0&#xb7;57 to -0&#xb7;25]; p<0&#xb7;0001). From overall baseline mean, mean bodyweight was reduced by 4&#xb7;6 kg (SE 0&#xb7;28) with semaglutide 0&#xb7;5 mg compared with 2&#xb7;3 kg (0&#xb7;27) with dulaglutide 0&#xb7;75 mg (ETD -2&#xb7;26 kg [-3&#xb7;02 to -1&#xb7;51]; p<0&#xb7;0001) and by 6&#xb7;5 kg (0&#xb7;28) with semaglutide 1&#xb7;0 mg compared with 3&#xb7;0 kg (0&#xb7;27) with dulaglutide 1&#xb7;5 mg (ETD -3&#xb7;55 kg [-4&#xb7;32 to -2&#xb7;78]; p<0&#xb7;0001). Gastrointestinal disorders were the most frequently reported adverse event, occurring in 129 (43%) of 301 patients receiving semaglutide 0&#xb7;5 mg, 133 (44%) of 300 patients receiving semaglutide 1&#xb7;0 mg, 100 (33%) of 299 patients receiving dulaglutide 0&#xb7;75 mg, and in 143 (48%) of 299 patients receiving dulaglutide 1&#xb7;5 mg. Gastrointestinal disorders were also the most common reason for discontinuing treatment with semaglutide and dulaglutide. There were six fatalities: one in each semaglutide group and two in each dulaglutide group. INTERPRETATION: At low and high doses, semaglutide was superior to dulaglutide in improving glycaemic control and reducing bodyweight, enabling a significantly greater number of patients with type 2 diabetes to achieve clinically meaningful glycaemic targets and weight loss, with a similar safety profile. FUNDING: Novo Nordisk.",
+        "journal": "The lancet. Diabetes & endocrinology",
+        "year": "2018",
+        "authors": [
+          "Pratley RE",
+          "Aroda VR",
+          "Lingvay I",
+          "L&#xfc;demann J",
+          "Andreassen C",
+          "Navarria A",
+          "Viljoen A",
+          "SUSTAIN 7 investigators"
+        ],
+        "url": "https://pubmed.ncbi.nlm.nih.gov/29397376/"
+      },
+      {
+        "pmid": "29756388",
+        "title": "Semaglutide for type 2 diabetes mellitus: A systematic review and meta-analysis.",
+        "abstract": "AIMS: To assess the efficacy and safety of semaglutide, a recently approved glucagon-like peptide 1 receptor agonist (GLP-1 RA) for type 2 diabetes. MATERIALS AND METHODS: We searched major electronic databases and grey literature sources for randomized controlled trials comparing semaglutide with placebo or other antidiabetic agents. Primary outcome was change from baseline in HbA1c. Secondary endpoints included change from baseline in body weight, blood pressure, heart rate and incidence of hypoglycaemia, gastrointestinal adverse effects, pancreatitis and diabetic retinopathy. RESULTS: A total of 6 placebo-controlled and 7 active-controlled studies with subcutaneous semaglutide were included. We identified only 1 trial with oral semaglutide. Compared with placebo, subcutaneous semaglutide 0.5 and 1 mg reduced HbA1c by 1.01% (95% CI, 0.56-1.47) and 1.38% (1.05-1.70), respectively. Both doses demonstrated superior glycaemic efficacy compared to other antidiabetic agents, including sitagliptin, exenatide, liraglutide, dulaglutide and insulin glargine. Semaglutide also had a beneficial effect on body weight (mean difference vs placebo -4.11 kg, 95% CI -4.85 to -3.37 for semaglutide 1 mg) and systolic blood pressure. We did not observe increased hypoglycaemia rates with semaglutide; nevertheless, we noted an increased incidence of nausea, vomiting and diarrhoea. Cases of pancreatitis were infrequent and the odds ratio for diabetic retinopathy compared with placebo was 1.32 (95% CI, 0.98-1.77). CONCLUSIONS: Semaglutide is a potent once-weekly GLP-1 RA, significantly reducing HbA1c, body weight and systolic blood pressure. However, it is associated with increased incidence of gastrointestinal adverse events. Results for pancreatitis and retinopathy require further assessment in post-approval pharmacovigilance studies.",
+        "journal": "Diabetes, obesity & metabolism",
+        "year": "2018",
+        "authors": [
+          "Andreadis P",
+          "Karagiannis T",
+          "Malandris K",
+          "Avgerinos I",
+          "Liakos A",
+          "Manolopoulos A",
+          "Bekiari E",
+          "Matthews DR",
+          "Tsapas A"
+        ],
+        "url": "https://pubmed.ncbi.nlm.nih.gov/29756388/"
+      },
+      {
+        "pmid": "39445596",
+        "title": "Associations of semaglutide with first-time diagnosis of Alzheimer's disease in patients with type 2 diabetes: Target trial emulation using nationwide real-world data in the US.",
+        "abstract": "INTRODUCTION: Emerging preclinical evidence suggests that semaglutide, a glucagon-like peptide receptor agonist (GLP-1RA) for type 2 diabetes mellitus (T2DM) and obesity, protects against neurodegeneration and neuroinflammation. However, real-world evidence for its ability to protect against Alzheimer's disease (AD) is lacking. METHODS: We conducted emulation target trials based on a nationwide database of electronic health records (EHRs) of 116 million US patients. Seven target trials were emulated among 1,094,761 eligible patients with T2DM who had no prior AD diagnosis by comparing semaglutide with seven other antidiabetic medications. First-ever diagnosis of AD occurred within a 3-year follow-up period and was examined using Cox proportional hazards and Kaplan-Meier survival analyses. RESULTS: Semaglutide was associated with significantly reduced risk for first-time AD diagnosis, most strongly compared with insulin (hazard ratio [HR], 0.33 [95% CI: 0.21 to 0.51]) and most weakly compared with other GLP-1RAs (HR, 0.59 [95% CI: 0.37 to 0.95]). Similar results were seen across obesity status, gender, and age groups. DISCUSSION: These findings support further studies to assess semaglutide's potential in preventing AD. HIGHLIGHTS: Semaglutide was associated with 40% to 70% reduced risks of first-time AD diagnosis in T2DM patients compared to other antidiabetic medications, including other GLP-1RAs. Semaglutide was associated with significantly lower AD-related medication prescriptions. Similar reductions were seen across obesity status, gender, and age groups. Our findings provide real-world evidence supporting the potential clinical benefits of semaglutide in mitigating AD initiation and development in patients with T2DM. These findings support further clinical trials to assess semaglutide's potential in delaying or preventing AD.",
+        "journal": "Alzheimer's & dementia : the journal of the Alzheimer's Association",
+        "year": "2024",
+        "authors": [
+          "Wang W",
+          "Wang Q",
+          "Qi X",
+          "Gurney M",
+          "Perry G",
+          "Volkow ND",
+          "Davis PB",
+          "Kaelber DC",
+          "Xu R"
+        ],
+        "url": "https://pubmed.ncbi.nlm.nih.gov/39445596/"
+      },
+      {
+        "pmid": "34894326",
+        "title": "Semaglutide and Diabetic Retinopathy Risk in Patients with Type 2 Diabetes Mellitus: A Meta-Analysis of Randomized Controlled Trials.",
+        "abstract": "BACKGROUND: Semaglutide is a recently approved glucagon-like peptide-1 receptor agonist used to treat patients with type 2 diabetes mellitus (T2DM). The SUSTAIN&#xa0;6 trial found a significantly higher rate of retinopathy complications in the semaglutide-treated group compared with the placebo group. OBJECTIVE: This study aimed to evaluate the association between semaglutide and the risk of retinopathy in patients with T2DM. METHODS: Electronic databases were systematically searched up to April 2021 to identify randomized controlled trials that reported diabetic retinopathy (DR) events in semaglutide-treated and control groups. A meta-analysis was conducted using Review Manager 5.4 software to calculate the risk ratio (RR) and 95% confidence intervals (CIs). RESULTS: A total of 23 randomized trials involving 22,096 patients with T2DM were included. There were 730 incident DR cases-463 in the semaglutide group and 267 in the control group. Overall, semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33). Subgroup analysis showed that semaglutide was associated with an increased risk of DR compared with placebo (RR 1.24, 95% CI 1.03-1.50). Moreover, patient age &#x2265;&#x2009;60&#xa0;years and diabetes duration &#x2265;&#x2009;10&#xa0;years were also factors for increased risk of DR when using semaglutide (RR 1.27, 95% CI 1.02-1.59; RR 1.28, 95% CI 1.04-1.58, respectively). CONCLUSIONS: Semaglutide was not associated with an increased risk of DR; however, caution regarding DR risk is needed for older patients or those with long diabetes duration when taking semaglutide.",
+        "journal": "Clinical drug investigation",
+        "year": "2022",
+        "authors": [
+          "Wang F",
+          "Mao Y",
+          "Wang H",
+          "Liu Y",
+          "Huang P"
+        ],
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34894326/"
+      }
+    ],
+    "model": "llama-3.3-70b-versatile",
+    "version": "heor-provenance/0.1.0",
+    "timestamp": "2026-06-13T22:32:10.390Z",
+    "confidentialAttestation": {
+      "provider": "chainlink-confidential-ai",
+      "model": "gemma4",
+      "enclave": "aws-nitro",
+      "contentDigest": "414531d4fb81b6511aa7334afb278180c14ba49bb1be292c5ecd0a76eab21247",
+      "requestDigest": "51ada1381f6eb0292ce546d26189fae0a2b424fd98ebf8b4da1527a50545f410",
+      "responseDigest": "aa1736f86b412220fbeac71e3899a9e6015a4414395f6fe3b97a5c7c25b93ffe",
+      "output": "Based on the confidential, synthetic data provided, here is a summary of the results for semaglutide in the context of type 2 diabetes with established cardiovascular disease:\n\n**Disclaimer:** This document contains synthetic, fabricated data created solely for demonstration purposes and is under strict embargo. It is not real trial data.\n\n**Study Overview:**\n*   **Study:** MER-T2D-301 (\"HORIZON-T2D\").\n*   **Compound:** Investigational extended-dose semaglutide.\n*   **Indication:** Type 2 diabetes mellitus in adults who also have established atherosclerotic cardiovascular disease.\n*   **Design:** A Phase 3, randomized, double-blind, placebo-controlled trial involving 2,148 adults.\n\n**Efficacy Results:**\n\n*   **Primary Endpoint (HbA1c Change at Week 52):**\n    *   The semaglutide treatment group showed a reduction of **-1.8%** from baseline.\n    *   The placebo group showed a reduction of **-0.3%**.\n    *   The treatment difference was **-1.5%** (highly statistically significant, p < 0.001).\n*   **Key Secondary Endpoints:**\n    *   **Body Weight:** Semaglutide resulted in a significant average weight loss of **-11.2 kg**, compared to -1.4 kg in the placebo group (a difference of -9.8 kg, p < 0.001).\n    *   **Cardiovascular Outcomes (3-point MACE):** The treatment was associated with a reduced risk of major adverse cardiovascular events (CV death, nonfatal MI, nonfatal stroke), with a Hazard Ratio (HR) of **0.74** (p = 0.003).\n    *   **Goal Attainment:** **68%** of patients on semaglutide achieved an HbA1c of less than 7.0%, compared to 21% in the placebo group.\n\n**Safety Profile:**\n\n*   **Gastrointestinal (GI) AEs:** Gastrointestinal adverse events (including nausea, vomiting, diarrhea) were reported more frequently in the semaglutide group (41% vs 16% in placebo). However, these were mostly described as mild-to-moderate and transient.\n*   **Serious Adverse Events (SAEs):** There was no significant difference in the incidence of serious adverse events between the two arms (9.1% vs 9.8%).\n*   **Overall:** No new safety signals were noted, and rates of pancreatitis and medullary thyroid events were reported as low and balanced across both groups."
+    },
+    "sha256": "64839e0ef81c129b64b8906b990c6c451d09b6971729fa4f8aa8a7d75420dd9c"
+  },
+  "confidentialAttestation": {
+    "provider": "chainlink-confidential-ai",
+    "model": "gemma4",
+    "enclave": "aws-nitro",
+    "contentDigest": "414531d4fb81b6511aa7334afb278180c14ba49bb1be292c5ecd0a76eab21247",
+    "requestDigest": "51ada1381f6eb0292ce546d26189fae0a2b424fd98ebf8b4da1527a50545f410",
+    "responseDigest": "aa1736f86b412220fbeac71e3899a9e6015a4414395f6fe3b97a5c7c25b93ffe",
+    "output": "Based on the confidential, synthetic data provided, here is a summary of the results for semaglutide in the context of type 2 diabetes with established cardiovascular disease:\n\n**Disclaimer:** This document contains synthetic, fabricated data created solely for demonstration purposes and is under strict embargo. It is not real trial data.\n\n**Study Overview:**\n*   **Study:** MER-T2D-301 (\"HORIZON-T2D\").\n*   **Compound:** Investigational extended-dose semaglutide.\n*   **Indication:** Type 2 diabetes mellitus in adults who also have established atherosclerotic cardiovascular disease.\n*   **Design:** A Phase 3, randomized, double-blind, placebo-controlled trial involving 2,148 adults.\n\n**Efficacy Results:**\n\n*   **Primary Endpoint (HbA1c Change at Week 52):**\n    *   The semaglutide treatment group showed a reduction of **-1.8%** from baseline.\n    *   The placebo group showed a reduction of **-0.3%**.\n    *   The treatment difference was **-1.5%** (highly statistically significant, p < 0.001).\n*   **Key Secondary Endpoints:**\n    *   **Body Weight:** Semaglutide resulted in a significant average weight loss of **-11.2 kg**, compared to -1.4 kg in the placebo group (a difference of -9.8 kg, p < 0.001).\n    *   **Cardiovascular Outcomes (3-point MACE):** The treatment was associated with a reduced risk of major adverse cardiovascular events (CV death, nonfatal MI, nonfatal stroke), with a Hazard Ratio (HR) of **0.74** (p = 0.003).\n    *   **Goal Attainment:** **68%** of patients on semaglutide achieved an HbA1c of less than 7.0%, compared to 21% in the placebo group.\n\n**Safety Profile:**\n\n*   **Gastrointestinal (GI) AEs:** Gastrointestinal adverse events (including nausea, vomiting, diarrhea) were reported more frequently in the semaglutide group (41% vs 16% in placebo). However, these were mostly described as mild-to-moderate and transient.\n*   **Serious Adverse Events (SAEs):** There was no significant difference in the incidence of serious adverse events between the two arms (9.1% vs 9.8%).\n*   **Overall:** No new safety signals were noted, and rates of pancreatitis and medullary thyroid events were reported as low and balanced across both groups."
+  }
+}
