@@ -5,15 +5,16 @@ import type {
   Claim,
   ConfidentialAttestation,
   EvidenceBundle,
-  Source,
 } from "@/lib/types";
 import { bundleSha256Client } from "./clientHash";
+
+// ── Primitives ────────────────────────────────────────────────────────────────
 
 const card: React.CSSProperties = {
   background: "var(--panel)",
   border: "1px solid var(--border)",
-  borderRadius: 12,
-  padding: "1.1rem 1.25rem",
+  borderRadius: 10,
+  padding: "1.4rem 1.5rem",
 };
 
 export function Card({
@@ -34,306 +35,344 @@ export function Card({
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h3 style={{ margin: "0 0 0.75rem", fontSize: "0.8rem", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--muted)" }}>
+    <h3
+      style={{
+        margin: "0 0 1rem",
+        fontSize: "0.72rem",
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        color: "var(--faint)",
+        fontWeight: 600,
+      }}
+    >
       {children}
     </h3>
   );
 }
 
-export function Chip({ children, tone = "default" }: { children: ReactNode; tone?: "default" | "good" | "bad" }) {
-  const tones = {
-    default: { bg: "var(--chip)", fg: "var(--text)" },
-    good: { bg: "var(--accent-dim)", fg: "#d7ffe0" },
-    bad: { bg: "#4d1f1f", fg: "#ffd7d7" },
-  }[tone];
+function Mono({ children, style }: { children: ReactNode; style?: React.CSSProperties }) {
+  return <span className="mono" style={style}>{children}</span>;
+}
+
+// A small, secondary tag holding the technical term next to a plain-language label.
+function Tag({ children }: { children: ReactNode }) {
   return (
-    <span style={{ background: tones.bg, color: tones.fg, borderRadius: 999, padding: "0.1rem 0.55rem", fontSize: "0.72rem", fontWeight: 600 }}>
+    <span
+      style={{
+        fontSize: "0.68rem",
+        letterSpacing: "0.04em",
+        textTransform: "uppercase",
+        color: "var(--faint)",
+        border: "1px solid var(--border)",
+        borderRadius: 5,
+        padding: "0.05rem 0.4rem",
+        fontWeight: 600,
+        whiteSpace: "nowrap",
+      }}
+    >
       {children}
     </span>
   );
 }
 
-// ── Value header ─────────────────────────────────────────────────────────────
-
-/**
- * Top-of-page contrast + the three guarantees, each anchor-linking to the panel
- * below where it is demonstrated (#grounded / #tamper-evident / #confidential).
- */
-export function ValueHeader() {
-  const guarantees: { label: string; href: string; blurb: string }[] = [
-    { label: "Grounded", href: "#grounded", blurb: "every claim cites a real PubMed source" },
-    { label: "Tamper-evident", href: "#tamper-evident", blurb: "bundle hash-locked; edits break the hash" },
-    { label: "Confidential", href: "#confidential", blurb: "sensitive inputs analyzed in a TEE" },
-  ];
-  return (
-    <Card style={{ marginBottom: "1.5rem" }}>
-      <p style={{ margin: 0, color: "var(--muted)" }}>
-        A plain LLM dossier: <span style={{ color: "var(--danger)" }}>unsourced, possibly hallucinated, unverifiable.</span>{" "}
-        <span style={{ color: "var(--text)" }}>
-          This: every claim sourced, the bundle hash-locked and tamper-evident, confidential inputs
-          analyzed in a TEE without leaking.
-        </span>
-      </p>
-      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.9rem" }}>
-        {guarantees.map((g) => (
-          <a
-            key={g.label}
-            href={g.href}
-            style={{
-              flex: "1 1 200px",
-              border: "1px solid var(--accent-dim)",
-              borderRadius: 10,
-              padding: "0.6rem 0.8rem",
-              textDecoration: "none",
-            }}
-          >
-            <div style={{ color: "var(--accent)", fontWeight: 700 }}>✓ {g.label}</div>
-            <div style={{ color: "var(--muted)", fontSize: "0.82rem" }}>{g.blurb}</div>
-          </a>
-        ))}
-      </div>
-    </Card>
-  );
-}
-
-// ── Claims & citations ───────────────────────────────────────────────────────
+// ── Citations ─────────────────────────────────────────────────────────────────
 
 function pubmedUrl(pmid: string): string {
   return `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`;
 }
 
-/** Inline clickable superscript citation; supporting sentence shown on hover. */
+/** Small, quiet citation chip linking to the PubMed record. */
 function Cite({ pmid, sentence }: { pmid: string; sentence: string }) {
   return (
-    <sup style={{ marginLeft: 2 }}>
-      <a
-        href={pubmedUrl(pmid)}
-        target="_blank"
-        rel="noreferrer"
-        title={sentence ? `PMID ${pmid} — “${sentence}”` : `PMID ${pmid}`}
-        style={{ fontWeight: 600 }}
-      >
-        [{pmid}]
-      </a>
-    </sup>
+    <a
+      href={pubmedUrl(pmid)}
+      target="_blank"
+      rel="noreferrer"
+      title={sentence ? `PMID ${pmid} — “${sentence}”` : `PMID ${pmid}`}
+      style={{
+        display: "inline-block",
+        marginLeft: "0.4rem",
+        fontSize: "0.7rem",
+        fontWeight: 600,
+        color: "var(--muted)",
+        background: "var(--panel-2)",
+        border: "1px solid var(--border)",
+        borderRadius: 5,
+        padding: "0.02rem 0.4rem",
+        verticalAlign: "1px",
+        whiteSpace: "nowrap",
+        textDecoration: "none",
+      }}
+    >
+      PMID {pmid}
+    </a>
   );
 }
 
-function SupportingSentence({ sentence }: { sentence: string }) {
-  if (!sentence) return null;
-  return (
-    <details style={{ marginTop: "0.3rem" }}>
-      <summary style={{ cursor: "pointer", color: "var(--muted)", fontSize: "0.78rem" }}>
-        supporting sentence
-      </summary>
-      <blockquote
-        style={{
-          margin: "0.4rem 0 0",
-          padding: "0.5rem 0.75rem",
-          borderLeft: "3px solid var(--border)",
-          color: "var(--muted)",
-          fontSize: "0.84rem",
-        }}
-      >
-        “{sentence}”
-      </blockquote>
-    </details>
-  );
-}
-
-function ClaimsSummary({ claims }: { claims: Claim[] }) {
-  const grounded = claims.filter((c) => c.status === "grounded").length;
-  const dropped = claims.length - grounded;
-  return (
-    <p style={{ color: "var(--muted)", fontSize: "0.84rem", margin: "0 0 0.9rem" }}>
-      {grounded}/{claims.length} claims grounded to a source; ungrounded claims dropped
-      {dropped > 0 ? ` (${dropped} dropped)` : ""}.
-    </p>
-  );
-}
-
-/** Read-only grounded claims with inline citations (used by the Generate view). */
-export function Claims({ claims }: { claims: Claim[] }) {
+function groundedCount(claims: Claim[]) {
   const grounded = claims.filter((c) => c.status === "grounded");
+  return { grounded, total: claims.length };
+}
+
+// ── 1. Hero verdict ─────────────────────────────────────────────────────────
+
+/** Plain-language verdict, quiet success styling — the first thing a judge reads. */
+export function HeroVerdict({ ok, source }: { ok: boolean; source: "example" | "live" }) {
+  const accent = ok ? "var(--good)" : "var(--danger)";
   return (
-    <>
-      <ClaimsSummary claims={claims} />
+    <div
+      style={{
+        background: ok ? "var(--good-soft)" : "var(--danger-soft)",
+        border: "1px solid var(--border)",
+        borderLeft: `3px solid ${accent}`,
+        borderRadius: 10,
+        padding: "1.2rem 1.5rem",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "baseline", gap: "0.6rem", flexWrap: "wrap" }}>
+        <strong style={{ color: accent, fontSize: "1.05rem", fontWeight: 650 }}>
+          {ok ? "Verified" : "Not verified"}
+        </strong>
+        <span style={{ fontSize: "1.05rem", color: "var(--text)" }}>
+          {ok
+            ? "every claim traces to a published source, and the record hasn’t been altered."
+            : "the stored content no longer matches its integrity hash."}
+        </span>
+      </div>
+      <p style={{ margin: "0.5rem 0 0", color: "var(--muted)", fontSize: "0.86rem" }}>
+        {source === "live"
+          ? "Checked just now: resolved the ENS name, fetched the evidence from Walrus, and recomputed the hash."
+          : "Showing the bundled example. The full chain of custody is below under “How this is verified.”"}
+      </p>
+    </div>
+  );
+}
+
+// ── 2. The dossier (readable) ─────────────────────────────────────────────────
+
+/** Clean, read-only dossier: claims as readable prose with a quiet citation chip. */
+export function ReadableDossier({ bundle }: { bundle: EvidenceBundle }) {
+  const { grounded, total } = groundedCount(bundle.claims);
+  return (
+    <Card id="grounded">
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.25rem" }}>
+        <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 650 }}>
+          {titleCase(bundle.query.drug)} — {bundle.query.indication}
+        </h2>
+        <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+          {grounded.length}/{total} claims sourced
+        </span>
+      </div>
+      <p style={{ margin: "0 0 1.3rem", color: "var(--faint)", fontSize: "0.82rem" }}>
+        Value-dossier evidence summary · drafted from PubMed, every claim grounded to a source
+      </p>
+
       {grounded.length === 0 ? (
         <p style={{ color: "var(--muted)" }}>No grounded claims.</p>
       ) : (
-        <ol style={{ margin: 0, paddingLeft: "1.2rem", display: "grid", gap: "0.9rem" }}>
-          {grounded.map((c) => (
-            <li key={c.id}>
-              <span>{c.text}</span>
+        <div style={{ display: "grid", gap: "0" }}>
+          {grounded.map((c, i) => (
+            <div
+              key={c.id}
+              style={{
+                padding: "0.95rem 0",
+                borderTop: i === 0 ? "none" : "1px solid var(--hairline)",
+                fontSize: "1.02rem",
+                lineHeight: 1.6,
+              }}
+            >
+              {c.text}
               <Cite pmid={c.pmid} sentence={c.supportingSentence} />
-              <SupportingSentence sentence={c.supportingSentence} />
-            </li>
+            </div>
           ))}
-        </ol>
+        </div>
       )}
-    </>
-  );
-}
-
-// ── Confidential attestation ──────────────────────────────────────────────────
-
-export function Attestation({ attestation }: { attestation: ConfidentialAttestation }) {
-  const Digest = ({ label, value }: { label: string; value: string }) => (
-    <div style={{ display: "flex", gap: "0.6rem" }}>
-      <span style={{ color: "var(--muted)", minWidth: 120 }}>{label}</span>
-      <span className="mono">{value}</span>
-    </div>
-  );
-  return (
-    <Card id="confidential" style={{ borderColor: "var(--accent-dim)" }}>
-      <SectionTitle>Confidential AI attestation · analyzed in a TEE</SectionTitle>
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
-        <Chip>{attestation.provider}</Chip>
-        <Chip>enclave: {attestation.enclave}</Chip>
-        <Chip>model: {attestation.model}</Chip>
-      </div>
-      <div style={{ display: "grid", gap: "0.35rem", fontSize: "0.85rem" }}>
-        <Digest label="contentDigest" value={attestation.contentDigest} />
-        <Digest label="requestDigest" value={attestation.requestDigest} />
-        <Digest label="responseDigest" value={attestation.responseDigest} />
-      </div>
-      {attestation.output ? (
-        <details style={{ marginTop: "0.75rem" }}>
-          <summary style={{ cursor: "pointer", color: "var(--muted)", fontSize: "0.85rem" }}>
-            Enclave output
-          </summary>
-          <pre style={{ whiteSpace: "pre-wrap", background: "var(--panel-2)", padding: "0.75rem", borderRadius: 8, marginTop: "0.5rem", fontSize: "0.82rem" }}>
-            {attestation.output}
-          </pre>
-        </details>
-      ) : null}
     </Card>
   );
 }
 
-// ── Provenance banner ─────────────────────────────────────────────────────────
+function titleCase(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
-export function ProvenanceBanner(props: {
+// ── 3. How this is verified (collapsed by default) ─────────────────────────────
+
+function ChainRow({
+  label,
+  tag,
+  children,
+  href,
+}: {
+  label: string;
+  tag: string;
+  children: ReactNode;
+  href?: string;
+}) {
+  return (
+    <div style={{ padding: "0.85rem 0", borderTop: "1px solid var(--hairline)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.55rem", marginBottom: "0.3rem" }}>
+        {href ? (
+          <a href={href} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>
+            {label}
+          </a>
+        ) : (
+          <span style={{ fontWeight: 600 }}>{label}</span>
+        )}
+        <Tag>{tag}</Tag>
+      </div>
+      <div style={{ fontSize: "0.85rem" }}>{children}</div>
+    </div>
+  );
+}
+
+const ENS_RECORD_LABELS: Record<string, string> = {
+  "heor.dossier.latest": "Evidence blob pinned on Walrus",
+  "heor.agent.version": "Agent version",
+  "heor.agent.capabilities": "Agent capabilities",
+};
+
+export function HowVerified(props: {
   ensName: string;
   blobId: string;
   aggregatorUrl: string;
-  hashMatch: boolean;
   sha256: string;
-}) {
-  const ok = props.hashMatch;
-  const Arrow = () => <span style={{ color: "var(--muted)" }}>→</span>;
-  return (
-    <Card id="tamper-evident" style={{ borderColor: ok ? "var(--accent)" : "var(--danger)", background: ok ? "#10231a" : "#231314" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem", flexWrap: "wrap" }}>
-        <strong style={{ color: ok ? "var(--accent)" : "var(--danger)" }}>
-          {ok ? "✓ Provenance verified" : "✗ Hash mismatch — not verified"}
-        </strong>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap", fontSize: "0.88rem" }}>
-        <span className="mono">{props.ensName}</span>
-        <Arrow />
-        <a href={props.aggregatorUrl} target="_blank" rel="noreferrer" className="mono" title="Fetch the blob from the Walrus aggregator">
-          {props.blobId}
-        </a>
-        <Arrow />
-        <Chip tone={ok ? "good" : "bad"}>sha256 {ok ? "match" : "mismatch"}</Chip>
-      </div>
-      <div className="mono" style={{ color: "var(--muted)", fontSize: "0.78rem", marginTop: "0.5rem" }}>
-        {props.sha256}
-      </div>
-    </Card>
-  );
-}
-
-// ── ENS pointer ───────────────────────────────────────────────────────────────
-
-/** The three provenance text records, in render order, with human labels. */
-const ENS_RECORD_KEYS: { key: string; label: string }[] = [
-  { key: "heor.dossier.latest", label: "blobId of the evidence bundle on Walrus" },
-  { key: "heor.agent.version", label: "agent version" },
-  { key: "heor.agent.capabilities", label: "agent capabilities" },
-];
-
-/**
- * The ENS provenance pointer: the name + its three resolved text records, read
- * LIVE from the ENS name. This is the identity/anchor layer — the dossier and
- * its hash hang off the blobId pinned in heor.dossier.latest.
- */
-export function EnsPointer({
-  ensName,
-  records,
-}: {
-  ensName: string;
+  hashMatch: boolean;
   records: Record<string, string>;
+  attestation?: ConfidentialAttestation;
 }) {
   return (
-    <Card style={{ borderColor: "var(--link)" }}>
-      <SectionTitle>ENS provenance pointer · read live from the name</SectionTitle>
-      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap", marginBottom: "0.85rem" }}>
-        <a
-          href={`https://app.ens.dev/${ensName}`}
-          target="_blank"
-          rel="noreferrer"
-          className="mono"
-          style={{ fontSize: "1rem", fontWeight: 600 }}
-          title="Open this name on the ENS app"
+    <Card id="how-verified" style={{ padding: 0 }}>
+      <details>
+        <summary
+          style={{
+            cursor: "pointer",
+            padding: "1.1rem 1.5rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.5rem",
+          }}
         >
-          {ensName}
-        </a>
-        <Chip>Sepolia</Chip>
-        <Chip>ENS text records</Chip>
-      </div>
+          <span style={{ fontWeight: 600 }}>How this is verified</span>
+          <span style={{ color: "var(--faint)", fontSize: "0.82rem" }}>
+            chain of custody · technical detail ▾
+          </span>
+        </summary>
 
-      <div style={{ display: "grid", gap: "0.55rem" }}>
-        {ENS_RECORD_KEYS.map(({ key, label }) => (
-          <div key={key} style={{ display: "grid", gap: "0.15rem" }}>
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "baseline", flexWrap: "wrap" }}>
-              <code style={{ color: "var(--link)" }}>{key}</code>
-              <span style={{ color: "var(--muted)", fontSize: "0.76rem" }}>{label}</span>
-            </div>
-            <span className="mono" style={{ color: records[key] ? "var(--text)" : "var(--muted)" }}>
-              {records[key] || "(not set)"}
+        <div style={{ padding: "0 1.5rem 1.4rem" }}>
+          <p style={{ color: "var(--muted)", fontSize: "0.85rem", margin: "0 0 0.5rem" }}>
+            Anyone can reconstruct this chain from public infrastructure, with no trust in us.
+          </p>
+
+          <ChainRow
+            label={`Published at ${props.ensName}`}
+            tag="ENS · Sepolia"
+            href={`https://app.ens.dev/${props.ensName}`}
+          >
+            <span style={{ color: "var(--muted)" }}>
+              The name resolves to the evidence blob via the{" "}
+              <Mono>heor.dossier.latest</Mono> text record.
             </span>
-          </div>
-        ))}
-      </div>
+          </ChainRow>
 
-      <p style={{ color: "var(--muted)", fontSize: "0.8rem", margin: "0.9rem 0 0" }}>
-        Resolved <span className="mono">{ensName}</span> →{" "}
-        <span className="mono">{records["heor.dossier.latest"] || "(no blobId)"}</span> via the{" "}
-        <code>heor.dossier.latest</code> ENS text record.
-      </p>
+          <ChainRow label="Evidence stored" tag="Walrus" href={props.aggregatorUrl}>
+            <Mono>{props.blobId}</Mono>
+          </ChainRow>
+
+          <ChainRow label="Integrity hash" tag="SHA-256">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+              <Mono>{props.sha256}</Mono>
+              <span
+                style={{
+                  fontSize: "0.72rem",
+                  fontWeight: 600,
+                  color: props.hashMatch ? "var(--good)" : "var(--danger)",
+                }}
+              >
+                {props.hashMatch ? "recomputed match" : "mismatch"}
+              </span>
+            </div>
+          </ChainRow>
+
+          {/* ENS text records */}
+          <div style={{ padding: "0.85rem 0", borderTop: "1px solid var(--hairline)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.55rem", marginBottom: "0.5rem" }}>
+              <span style={{ fontWeight: 600 }}>On-chain records</span>
+              <Tag>ENS text records</Tag>
+            </div>
+            <div style={{ display: "grid", gap: "0.5rem" }}>
+              {Object.keys(ENS_RECORD_LABELS).map((key) => (
+                <div key={key} style={{ display: "grid", gap: "0.1rem" }}>
+                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "baseline", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                      {ENS_RECORD_LABELS[key]}
+                    </span>
+                    <Mono style={{ color: "var(--faint)" }}>{key}</Mono>
+                  </div>
+                  <Mono>{props.records[key] || "(not set)"}</Mono>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Confidential attestation */}
+          {props.attestation ? (
+            <div style={{ padding: "0.85rem 0", borderTop: "1px solid var(--hairline)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.55rem", marginBottom: "0.5rem" }}>
+                <span style={{ fontWeight: 600 }}>Confidential analysis</span>
+                <Tag>TEE-attested</Tag>
+              </div>
+              <p style={{ color: "var(--muted)", fontSize: "0.85rem", margin: "0 0 0.5rem" }}>
+                A sensitive document was analyzed inside an {props.attestation.enclave} enclave
+                ({props.attestation.provider}); the enclave signed digests binding the
+                content, request, and response.
+              </p>
+              <div style={{ display: "grid", gap: "0.35rem" }}>
+                <DigestRow label="content" value={props.attestation.contentDigest} />
+                <DigestRow label="request" value={props.attestation.requestDigest} />
+                <DigestRow label="response" value={props.attestation.responseDigest} />
+              </div>
+              {props.attestation.output ? (
+                <details style={{ marginTop: "0.7rem" }}>
+                  <summary style={{ cursor: "pointer", color: "var(--muted)", fontSize: "0.82rem" }}>
+                    Enclave output ▾
+                  </summary>
+                  <pre
+                    style={{
+                      whiteSpace: "pre-wrap",
+                      background: "var(--panel-2)",
+                      padding: "0.75rem",
+                      borderRadius: 8,
+                      marginTop: "0.5rem",
+                      fontSize: "0.8rem",
+                      lineHeight: 1.5,
+                      color: "var(--text)",
+                    }}
+                  >
+                    {props.attestation.output}
+                  </pre>
+                </details>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </details>
     </Card>
   );
 }
 
-// ── Dossier views ─────────────────────────────────────────────────────────────
-
-const dossierHeaderChips = (bundle: EvidenceBundle) => (
-  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.6rem" }}>
-    <Chip>{bundle.query.drug}</Chip>
-    <Chip>{bundle.query.indication}</Chip>
-    <Chip>model: {bundle.model}</Chip>
-    <Chip>v{bundle.version}</Chip>
-  </div>
-);
-
-/** Read-only dossier (Generate view). */
-export function DossierView({ bundle }: { bundle: EvidenceBundle }) {
+function DigestRow({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: "grid", gap: "1rem" }}>
-      <Card id="grounded">
-        <SectionTitle>Dossier · grounded claims</SectionTitle>
-        {dossierHeaderChips(bundle)}
-        <Claims claims={bundle.claims} />
-      </Card>
-      {bundle.confidentialAttestation ? <Attestation attestation={bundle.confidentialAttestation} /> : null}
+    <div style={{ display: "flex", gap: "0.6rem", alignItems: "baseline" }}>
+      <span style={{ color: "var(--faint)", fontSize: "0.78rem", minWidth: 70 }}>{label}</span>
+      <Mono>{value}</Mono>
     </div>
   );
 }
 
-/** Verify-view dossier with an interactive tamper demo over the claim text. */
-export function VerifyDossier({
+// ── 4. Tamper test (opt-in) ────────────────────────────────────────────────────
+
+export function TamperTest({
   bundle,
   storedSha256,
 }: {
@@ -345,6 +384,8 @@ export function VerifyDossier({
     () => Object.fromEntries(bundle.claims.map((c) => [c.id, c.text])) as Record<string, string>,
     [bundle],
   );
+
+  const [open, setOpen] = useState(false);
   const [texts, setTexts] = useState<Record<string, string>>(original);
   const [busy, setBusy] = useState(false);
   const [check, setCheck] = useState<{ match: boolean; current: string } | null>(null);
@@ -353,8 +394,8 @@ export function VerifyDossier({
 
   async function reVerify() {
     setBusy(true);
-    // Rebuild the bundle with edited claim text and recompute the canonical hash
-    // exactly as the server does (bundleSha256), then compare to the stored hash.
+    // Recompute the canonical hash exactly as the server does (src/lib/hash.ts
+    // logic, mirrored in clientHash.ts), then compare to the stored hash.
     const editedBundle = {
       ...bundle,
       claims: bundle.claims.map((c) => ({ ...c, text: texts[c.id] ?? c.text })),
@@ -369,102 +410,164 @@ export function VerifyDossier({
     setCheck(null);
   }
 
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          padding: "0.55rem 1rem",
+          borderRadius: 7,
+          border: "1px solid var(--border)",
+          background: "var(--panel)",
+          color: "var(--muted)",
+          fontWeight: 600,
+          fontSize: "0.88rem",
+        }}
+      >
+        Edit a claim to test integrity →
+      </button>
+    );
+  }
+
   return (
-    <div style={{ display: "grid", gap: "1rem" }}>
-      <Card id="grounded">
-        <SectionTitle>Dossier · grounded claims (editable — tamper demo)</SectionTitle>
-        {dossierHeaderChips(bundle)}
-        <ClaimsSummary claims={bundle.claims} />
-        <p style={{ color: "var(--muted)", fontSize: "0.82rem", margin: "0 0 0.9rem" }}>
-          Edit any claim below and press <strong>Re-verify</strong> — the bundle hash is recomputed
-          client-side and compared to the hash stored on-chain.
-        </p>
+    <Card>
+      <SectionTitle>Integrity test</SectionTitle>
+      <p style={{ color: "var(--muted)", fontSize: "0.85rem", margin: "0 0 1rem" }}>
+        Change any claim and re-verify. The bundle hash is recomputed in your browser and
+        compared to the hash stored on-chain — any edit breaks the match.
+      </p>
 
-        {grounded.length === 0 ? (
-          <p style={{ color: "var(--muted)" }}>No grounded claims.</p>
-        ) : (
-          <ol style={{ margin: 0, paddingLeft: "1.2rem", display: "grid", gap: "1rem" }}>
-            {grounded.map((c) => {
-              const isEdited = texts[c.id] !== original[c.id];
-              return (
-                <li key={c.id}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem" }}>
-                    <textarea
-                      value={texts[c.id] ?? ""}
-                      onChange={(e) => setTexts((t) => ({ ...t, [c.id]: e.target.value }))}
-                      rows={2}
-                      style={{
-                        font: "inherit",
-                        width: "100%",
-                        resize: "vertical",
-                        padding: "0.5rem 0.65rem",
-                        background: "var(--panel-2)",
-                        color: "var(--text)",
-                        border: `1px solid ${isEdited ? "var(--danger)" : "var(--border)"}`,
-                        borderRadius: 8,
-                      }}
-                    />
-                    <Cite pmid={c.pmid} sentence={c.supportingSentence} />
-                  </div>
-                  {isEdited ? (
-                    <span style={{ color: "var(--danger)", fontSize: "0.74rem" }}>edited</span>
-                  ) : null}
-                  <SupportingSentence sentence={c.supportingSentence} />
-                </li>
-              );
-            })}
-          </ol>
-        )}
+      <div style={{ display: "grid", gap: "0.8rem" }}>
+        {grounded.map((c) => {
+          const isEdited = texts[c.id] !== original[c.id];
+          return (
+            <div key={c.id}>
+              <textarea
+                value={texts[c.id] ?? ""}
+                onChange={(e) => setTexts((t) => ({ ...t, [c.id]: e.target.value }))}
+                rows={2}
+                style={{
+                  font: "inherit",
+                  width: "100%",
+                  resize: "vertical",
+                  padding: "0.55rem 0.7rem",
+                  background: "var(--panel)",
+                  color: "var(--text)",
+                  border: `1px solid ${isEdited ? "var(--danger)" : "var(--border)"}`,
+                  borderRadius: 7,
+                  lineHeight: 1.5,
+                }}
+              />
+              {isEdited ? (
+                <span style={{ color: "var(--danger)", fontSize: "0.74rem" }}>edited</span>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
 
-        <div style={{ display: "flex", gap: "0.6rem", marginTop: "1rem", alignItems: "center", flexWrap: "wrap" }}>
-          <button
-            onClick={reVerify}
-            disabled={busy}
-            style={{ padding: "0.45rem 1rem", borderRadius: 8, border: "1px solid var(--border)", background: "var(--panel-2)", color: "var(--text)", fontWeight: 600 }}
-          >
-            {busy ? "Hashing…" : "Re-verify"}
-          </button>
-          <button
-            onClick={reset}
-            disabled={!edited && !check}
-            style={{ padding: "0.45rem 1rem", borderRadius: 8, border: "1px solid var(--border)", background: "transparent", color: "var(--muted)", fontWeight: 600 }}
-          >
-            Reset
-          </button>
-        </div>
+      <div style={{ display: "flex", gap: "0.6rem", marginTop: "1rem", alignItems: "center", flexWrap: "wrap" }}>
+        <button
+          onClick={reVerify}
+          disabled={busy}
+          style={{
+            padding: "0.5rem 1.1rem",
+            borderRadius: 7,
+            border: "1px solid var(--accent)",
+            background: "var(--accent)",
+            color: "#fff",
+            fontWeight: 600,
+          }}
+        >
+          {busy ? "Hashing…" : "Re-verify"}
+        </button>
+        <button
+          onClick={reset}
+          disabled={!edited && !check}
+          style={{
+            padding: "0.5rem 1.1rem",
+            borderRadius: 7,
+            border: "1px solid var(--border)",
+            background: "transparent",
+            color: "var(--muted)",
+            fontWeight: 600,
+          }}
+        >
+          Reset
+        </button>
+      </div>
 
-        {check ? (
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "0.85rem 1rem",
-              borderRadius: 10,
-              border: `1px solid ${check.match ? "var(--accent)" : "var(--danger)"}`,
-              background: check.match ? "#10231a" : "#231314",
-            }}
-          >
-            <strong style={{ color: check.match ? "var(--accent)" : "var(--danger)" }}>
-              {check.match
-                ? "✓ PROVENANCE INTACT — recomputed hash matches the stored hash"
-                : "✗ PROVENANCE FAILED — content altered, hash no longer matches"}
-            </strong>
-            <div style={{ display: "grid", gap: "0.25rem", marginTop: "0.6rem", fontSize: "0.78rem" }}>
-              <div style={{ display: "flex", gap: "0.6rem" }}>
-                <span style={{ color: "var(--muted)", minWidth: 110 }}>stored (before)</span>
-                <span className="mono">{storedSha256}</span>
-              </div>
-              <div style={{ display: "flex", gap: "0.6rem" }}>
-                <span style={{ color: "var(--muted)", minWidth: 110 }}>recomputed (after)</span>
-                <span className="mono" style={{ color: check.match ? "var(--text)" : "var(--danger)" }}>
-                  {check.current}
-                </span>
-              </div>
+      {check ? (
+        <div
+          style={{
+            marginTop: "1.1rem",
+            padding: "0.9rem 1.1rem",
+            borderRadius: 9,
+            border: "1px solid var(--border)",
+            borderLeft: `3px solid ${check.match ? "var(--good)" : "var(--danger)"}`,
+            background: check.match ? "var(--good-soft)" : "var(--danger-soft)",
+          }}
+        >
+          <strong style={{ color: check.match ? "var(--good)" : "var(--danger)" }}>
+            {check.match
+              ? "Integrity check passed — recomputed hash matches the stored hash."
+              : "Integrity check failed — content was altered."}
+          </strong>
+          <div style={{ display: "grid", gap: "0.3rem", marginTop: "0.6rem", fontSize: "0.78rem" }}>
+            <div style={{ display: "flex", gap: "0.6rem" }}>
+              <span style={{ color: "var(--faint)", minWidth: 110 }}>stored</span>
+              <Mono>{storedSha256}</Mono>
+            </div>
+            <div style={{ display: "flex", gap: "0.6rem" }}>
+              <span style={{ color: "var(--faint)", minWidth: 110 }}>recomputed</span>
+              <Mono style={{ color: check.match ? "var(--muted)" : "var(--danger)" }}>
+                {check.current}
+              </Mono>
             </div>
           </div>
-        ) : null}
-      </Card>
+        </div>
+      ) : null}
+    </Card>
+  );
+}
 
-      {bundle.confidentialAttestation ? <Attestation attestation={bundle.confidentialAttestation} /> : null}
+// ── Result assembly ─────────────────────────────────────────────────────────
+
+export interface DossierResultData {
+  ensName: string;
+  blobId: string;
+  aggregatorUrl: string;
+  records: Record<string, string>;
+  bundle: EvidenceBundle;
+  hashMatch: boolean;
+}
+
+/**
+ * The full result view shared by Verify and Generate: hero verdict, readable
+ * dossier, collapsed chain-of-custody, and the opt-in tamper test. Meaning
+ * first, technical detail folded away.
+ */
+export function DossierResult({
+  data,
+  source,
+}: {
+  data: DossierResultData;
+  source: "example" | "live";
+}) {
+  return (
+    <div style={{ display: "grid", gap: "1.1rem" }}>
+      <HeroVerdict ok={data.hashMatch} source={source} />
+      <ReadableDossier bundle={data.bundle} />
+      <HowVerified
+        ensName={data.ensName}
+        blobId={data.blobId}
+        aggregatorUrl={data.aggregatorUrl}
+        sha256={data.bundle.sha256}
+        hashMatch={data.hashMatch}
+        records={data.records}
+        attestation={data.bundle.confidentialAttestation}
+      />
+      <TamperTest bundle={data.bundle} storedSha256={data.bundle.sha256} />
     </div>
   );
 }

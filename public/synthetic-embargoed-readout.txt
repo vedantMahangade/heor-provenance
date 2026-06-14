@@ -1,0 +1,35 @@
+CONFIDENTIAL — PRE-PUBLICATION / EMBARGOED
+SYNTHETIC DATA — FABRICATED FOR DEMONSTRATION ONLY. NOT REAL TRIAL DATA. DO NOT CITE.
+
+Sponsor: Meridian Therapeutics (fictional)
+Study ID: MER-T2D-301 ("HORIZON-T2D")
+Compound: semaglutide (investigational extended-dose regimen)
+Indication: type 2 diabetes mellitus with established cardiovascular disease
+Status: Topline results — EMBARGOED until primary manuscript publication. Internal value-evidence use only.
+
+STUDY DESIGN
+Phase 3, randomized, double-blind, placebo-controlled, multinational trial.
+N = 2,148 adults with inadequately controlled type 2 diabetes (baseline HbA1c 7.5–10.5%)
+and established atherosclerotic cardiovascular disease. Randomized 1:1 to investigational
+extended-dose semaglutide versus placebo, on top of standard of care. Median follow-up 104 weeks.
+
+PRIMARY ENDPOINT — HbA1c change from baseline at week 52
+  Treatment:            -1.8% (95% CI -1.9 to -1.7)
+  Placebo:              -0.3% (95% CI -0.4 to -0.2)
+  Treatment difference: -1.5% (p < 0.001)
+
+KEY SECONDARY ENDPOINTS
+  Body weight change at week 52:        -11.2 kg vs -1.4 kg (difference -9.8 kg, p < 0.001)
+  3-point MACE (CV death, nonfatal MI,
+    nonfatal stroke):                   HR 0.74 (95% CI 0.61–0.90, p = 0.003)
+  Patients achieving HbA1c < 7.0%:      68% vs 21%
+
+SAFETY
+  Gastrointestinal AEs (nausea, vomiting, diarrhea): 41% vs 16%; mostly mild-to-moderate and transient.
+  Serious adverse events:                            9.1% vs 9.8% (no significant difference).
+  No new safety signals. Pancreatitis and medullary thyroid events low and balanced across arms.
+
+EMBARGO NOTICE
+These results are unpublished and under embargo. Do not disclose, quote, or share externally
+until the primary manuscript is published. This document is fabricated synthetic data created
+solely to demonstrate confidential-document handling and contains no real patient or trial information.

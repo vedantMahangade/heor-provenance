@@ -3,39 +3,31 @@
 import { useEffect, useState } from "react";
 import type { FullGenerateResult, ProgressStep } from "@/lib/fullGenerate";
 import type { VerifyResult } from "@/lib/verify";
-import {
-  Card,
-  Chip,
-  DossierView,
-  EnsPointer,
-  ProvenanceBanner,
-  SectionTitle,
-  ValueHeader,
-  VerifyDossier,
-} from "./components";
+import { Card, DossierResult, SectionTitle, type DossierResultData } from "./components";
 
 type Tab = "verify" | "generate";
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>("verify");
   return (
-    <main style={{ maxWidth: 860, margin: "0 auto", padding: "2.5rem 1.25rem 4rem" }}>
-      <header style={{ marginBottom: "1.25rem" }}>
-        <h1 style={{ margin: 0, fontSize: "1.6rem" }}>HEOR Provenance Agent</h1>
-        <p style={{ color: "var(--muted)", margin: "0.4rem 0 0" }}>
-          Grounded HEOR dossier claims from real PubMed evidence, each independently verifiable via
-          Walrus + ENS. Augmentation with a human in the loop — not autonomous drafting.
+    <main style={{ maxWidth: 760, margin: "0 auto", padding: "3rem 1.25rem 5rem" }}>
+      <header style={{ marginBottom: "2rem" }}>
+        <h1 style={{ margin: 0, fontSize: "1.5rem", fontWeight: 650, letterSpacing: "-0.01em" }}>
+          HEOR Provenance Agent
+        </h1>
+        <p style={{ color: "var(--muted)", margin: "0.5rem 0 0", maxWidth: 600 }}>
+          HEOR value-dossier claims drafted from real PubMed evidence — each one independently
+          verifiable through Walrus and ENS. Augmentation with a human in the loop, not autonomous
+          drafting.
         </p>
       </header>
 
-      <ValueHeader />
-
-      <nav style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+      <nav style={{ display: "flex", gap: "1.5rem", marginBottom: "1.75rem", borderBottom: "1px solid var(--border)" }}>
         <TabButton active={tab === "verify"} onClick={() => setTab("verify")}>
-          Verify (no keys needed)
+          Verify
         </TabButton>
         <TabButton active={tab === "generate"} onClick={() => setTab("generate")}>
-          Generate (requires keys)
+          Generate
         </TabButton>
       </nav>
 
@@ -49,12 +41,14 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
     <button
       onClick={onClick}
       style={{
-        padding: "0.5rem 1.1rem",
-        borderRadius: 8,
-        border: "1px solid var(--border)",
-        background: active ? "var(--panel-2)" : "transparent",
+        padding: "0 0 0.7rem",
+        border: "none",
+        background: "transparent",
         color: active ? "var(--text)" : "var(--muted)",
         fontWeight: 600,
+        fontSize: "0.95rem",
+        borderBottom: `2px solid ${active ? "var(--accent)" : "transparent"}`,
+        marginBottom: -1,
       }}
     >
       {children}
@@ -63,44 +57,73 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 }
 
 const primaryBtn: React.CSSProperties = {
-  padding: "0.6rem 1.2rem",
-  borderRadius: 8,
-  border: "1px solid var(--accent-dim)",
-  background: "var(--accent-dim)",
-  color: "#eafff0",
+  padding: "0.55rem 1.1rem",
+  borderRadius: 7,
+  border: "1px solid var(--accent)",
+  background: "var(--accent)",
+  color: "#fff",
   fontWeight: 600,
 };
 
-// ── Verify (default, keyless) ─────────────────────────────────────────────────
+const quietBtn: React.CSSProperties = {
+  padding: "0.55rem 1.1rem",
+  borderRadius: 7,
+  border: "1px solid var(--border)",
+  background: "var(--panel)",
+  color: "var(--text)",
+  fontWeight: 600,
+};
 
-function VerifyPanel() {
-  const [name, setName] = useState("heor-prov.eth");
-  const [result, setResult] = useState<VerifyResult | null>(null);
-  const [source, setSource] = useState<"example" | "live">("example");
-  const [loadingExample, setLoadingExample] = useState(true);
-  const [verifying, setVerifying] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+/** Normalize a VerifyResult into the shared result shape. */
+function fromVerify(v: VerifyResult): DossierResultData {
+  return {
+    ensName: v.ensName,
+    blobId: v.blobId,
+    aggregatorUrl: v.aggregatorUrl,
+    records: v.records,
+    bundle: v.dossier,
+    hashMatch: v.hashMatch,
+  };
+}
 
-  // Render the bundled example immediately on load — no network to an external
-  // service, no keys. This is the first thing a judge sees.
+/** Normalize a live FullGenerateResult into the shared result shape. */
+function fromGenerate(r: FullGenerateResult): DossierResultData {
+  return {
+    ensName: r.ensName,
+    blobId: r.blobId,
+    aggregatorUrl: r.aggregatorUrl,
+    records: Object.fromEntries(r.txs.map((t) => [t.key, t.value])),
+    bundle: r.bundle,
+    hashMatch: true,
+  };
+}
+
+function useExample(): DossierResultData | null {
+  const [data, setData] = useState<DossierResultData | null>(null);
   useEffect(() => {
     let cancelled = false;
     fetch("/demo/sample-bundle.json")
       .then((r) => r.json())
-      .then((d: VerifyResult) => {
-        if (!cancelled) {
-          setResult(d);
-          setSource("example");
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setLoadingExample(false);
-      });
+      .then((d: VerifyResult) => !cancelled && setData(fromVerify(d)))
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
   }, []);
+  return data;
+}
+
+// ── Verify (default, keyless) ─────────────────────────────────────────────────
+
+function VerifyPanel() {
+  const example = useExample();
+  const [data, setData] = useState<DossierResultData | null>(null);
+  const [source, setSource] = useState<"example" | "live">("example");
+  const [name, setName] = useState("heor-prov.eth");
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const shown = data ?? example;
 
   async function verifyLive() {
     if (verifying) return;
@@ -114,7 +137,7 @@ function VerifyPanel() {
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j?.error ?? `Request failed (${res.status})`);
-      setResult(j as VerifyResult);
+      setData(fromVerify(j as VerifyResult));
       setSource("live");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -124,62 +147,80 @@ function VerifyPanel() {
   }
 
   return (
-    <div style={{ display: "grid", gap: "1.25rem" }}>
-      <Card>
-        <SectionTitle>Verify provenance · ENS → Walrus → recompute sha256</SectionTitle>
-        <div style={{ display: "flex", gap: "0.6rem", alignItems: "flex-end", flexWrap: "wrap" }}>
+    <div style={{ display: "grid", gap: "1.1rem" }}>
+      {error ? <ErrorNote message={error} /> : null}
+      {shown ? (
+        <DossierResult data={shown} source={source} />
+      ) : (
+        <Card>
+          <span className="spin" /> Loading example…
+        </Card>
+      )}
+
+      <details style={{ marginTop: "0.25rem" }}>
+        <summary style={{ cursor: "pointer", color: "var(--muted)", fontSize: "0.86rem" }}>
+          Verify a live ENS name instead ▾
+        </summary>
+        <div style={{ display: "flex", gap: "0.6rem", alignItems: "flex-end", flexWrap: "wrap", marginTop: "0.8rem" }}>
           <div style={{ flex: "1 1 240px" }}>
             <label htmlFor="ens">ENS name</label>
             <input id="ens" type="text" value={name} placeholder="heor-prov.eth" onChange={(e) => setName(e.target.value)} disabled={verifying} />
           </div>
-          <button onClick={verifyLive} style={primaryBtn} disabled={verifying}>
-            {verifying ? "Verifying on-chain…" : "Verify live on-chain"}
+          <button onClick={verifyLive} style={quietBtn} disabled={verifying}>
+            {verifying ? "Verifying…" : "Verify on-chain"}
           </button>
         </div>
-        <p style={{ color: "var(--muted)", fontSize: "0.82rem", margin: "0.7rem 0 0" }}>
-          {source === "live"
-            ? "✓ Verified live just now — resolved the ENS record, fetched the blob from Walrus, and recomputed the hash."
-            : "Showing the bundled example below (no keys needed). Click “Verify live on-chain” to run the real round trip. Reads default to a public Sepolia RPC, so this works on a clean clone."}
+        <p style={{ color: "var(--faint)", fontSize: "0.8rem", margin: "0.6rem 0 0" }}>
+          Reads run against a public Sepolia RPC and the Walrus aggregator — no keys needed.
         </p>
-      </Card>
-
-      {error ? (
-        <Card style={{ borderColor: "var(--danger)", background: "#231314" }}>
-          <strong style={{ color: "var(--danger)" }}>Error</strong>
-          <p style={{ margin: "0.4rem 0 0", whiteSpace: "pre-wrap" }}>{error}</p>
-        </Card>
-      ) : null}
-
-      {loadingExample && !result ? <Card><span className="spin" /> Loading example…</Card> : null}
-
-      {result ? (
-        <>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Chip tone={source === "live" ? "good" : "default"}>
-              {source === "live" ? "live on-chain result" : "bundled example (cached, keyless)"}
-            </Chip>
-          </div>
-          <ProvenanceBanner
-            ensName={result.ensName}
-            blobId={result.blobId}
-            aggregatorUrl={result.aggregatorUrl}
-            hashMatch={result.hashMatch}
-            sha256={result.dossier.sha256}
-          />
-          <EnsPointer ensName={result.ensName} records={result.records} />
-          <VerifyDossier bundle={result.dossier} storedSha256={result.dossier.sha256} />
-        </>
-      ) : null}
+      </details>
     </div>
   );
 }
 
-// ── Generate (gated behind keys) ──────────────────────────────────────────────
-
-const README_GENERATE_URL =
-  "https://github.com/vedantMahangade/heor-provenance#generate-requires-keys";
+// ── Generate (example preloaded; live run gated behind keys) ───────────────────
 
 function GeneratePanel() {
+  const example = useExample();
+  const [live, setLive] = useState(false);
+
+  if (live) return <GenerateLive onBack={() => setLive(false)} />;
+
+  return (
+    <div style={{ display: "grid", gap: "1.1rem" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "0.75rem",
+          flexWrap: "wrap",
+          padding: "0.85rem 1.1rem",
+          background: "var(--panel-2)",
+          border: "1px solid var(--border)",
+          borderRadius: 9,
+        }}
+      >
+        <span style={{ color: "var(--muted)", fontSize: "0.88rem" }}>
+          A finished example, generated earlier — no keys or wait.
+        </span>
+        <button onClick={() => setLive(true)} style={quietBtn}>
+          Run live (requires keys)
+        </button>
+      </div>
+
+      {example ? (
+        <DossierResult data={example} source="example" />
+      ) : (
+        <Card>
+          <span className="spin" /> Loading example…
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function GenerateLive({ onBack }: { onBack: () => void }) {
   const [cfg, setCfg] = useState<{ generateEnabled: boolean; missing: string[] } | null>(null);
 
   useEffect(() => {
@@ -193,39 +234,52 @@ function GeneratePanel() {
     };
   }, []);
 
-  if (cfg === null) {
-    return <Card><span className="spin" /> Checking configuration…</Card>;
-  }
+  return (
+    <div style={{ display: "grid", gap: "1.1rem" }}>
+      <button onClick={onBack} style={{ ...quietBtn, justifySelf: "start", color: "var(--muted)" }}>
+        ← Back to example
+      </button>
+      {cfg === null ? (
+        <Card>
+          <span className="spin" /> Checking configuration…
+        </Card>
+      ) : !cfg.generateEnabled ? (
+        <KeysNeeded missing={cfg.missing} />
+      ) : (
+        <GenerateForm />
+      )}
+    </div>
+  );
+}
 
-  if (!cfg.generateEnabled) {
-    return (
-      <Card style={{ borderColor: "var(--border)" }}>
-        <SectionTitle>Generate needs API keys</SectionTitle>
-        <p style={{ margin: "0 0 0.6rem" }}>
-          Generating a new dossier runs PubMed → an LLM → optional confidential inference → Walrus →
-          ENS writes, so it needs server-side keys and a funded Sepolia key. None are required for the
-          Verify demo.
-        </p>
-        {cfg.missing.length > 0 ? (
-          <p style={{ color: "var(--muted)", fontSize: "0.85rem", margin: "0 0 0.6rem" }}>
-            Missing: <span className="mono">{cfg.missing.join(", ")}</span>
-          </p>
-        ) : null}
-        <p style={{ margin: 0 }}>
-          <a href={README_GENERATE_URL} target="_blank" rel="noreferrer">
-            README → Generate (requires keys)
-          </a>{" "}
-          lists the env vars (also see <span className="mono">.env.example</span>).
-        </p>
-      </Card>
-    );
-  }
+const README_GENERATE_URL =
+  "https://github.com/vedantMahangade/heor-provenance#generate-requires-keys";
 
-  return <GenerateForm />;
+function KeysNeeded({ missing }: { missing: string[] }) {
+  return (
+    <Card>
+      <SectionTitle>Live generate needs keys</SectionTitle>
+      <p style={{ margin: "0 0 0.7rem" }}>
+        A live run goes PubMed → LLM → optional confidential inference → Walrus → ENS, so it needs
+        server-side API keys and a funded Sepolia key. The Verify demo and the example above need none.
+      </p>
+      {missing.length > 0 ? (
+        <p style={{ color: "var(--muted)", fontSize: "0.85rem", margin: "0 0 0.7rem" }}>
+          Missing: <span className="mono">{missing.join(", ")}</span>
+        </p>
+      ) : null}
+      <p style={{ margin: 0 }}>
+        <a href={README_GENERATE_URL} target="_blank" rel="noreferrer">
+          README → Generate (requires keys)
+        </a>{" "}
+        lists the env vars (see also <span className="mono">.env.example</span>).
+      </p>
+    </Card>
+  );
 }
 
 const STEP_LABELS: Record<ProgressStep, string> = {
-  draft: "Fetch PubMed evidence + draft grounded claims",
+  draft: "Fetch PubMed evidence and draft grounded claims",
   confidential: "Confidential enclave attestation (AWS Nitro)",
   walrus: "Store evidence bundle on Walrus",
   ens: "Pin provenance to ENS text records",
@@ -302,7 +356,7 @@ function GenerateForm() {
   }
 
   return (
-    <div style={{ display: "grid", gap: "1.25rem" }}>
+    <div style={{ display: "grid", gap: "1.1rem" }}>
       <Card>
         <form onSubmit={onSubmit} style={{ display: "grid", gap: "1rem" }}>
           <div>
@@ -316,13 +370,13 @@ function GenerateForm() {
           <div>
             <label htmlFor="sensitive">Sensitive document (optional — runs confidential attestation)</label>
             <input id="sensitive" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} disabled={running} />
-            <p style={{ color: "var(--muted)", fontSize: "0.78rem", margin: "0.4rem 0 0" }}>
-              ⚠ The Confidential AI dev preview may log inputs — use SYNTHETIC data only, never real PHI.
+            <p style={{ color: "var(--faint)", fontSize: "0.78rem", margin: "0.4rem 0 0" }}>
+              The Confidential AI dev preview may log inputs — use SYNTHETIC data only, never real PHI.
             </p>
           </div>
           <div>
             <button type="submit" style={primaryBtn} disabled={running || !drug.trim() || !indication.trim()}>
-              {running ? "Running…" : "Generate + anchor provenance"}
+              {running ? "Running…" : "Generate and anchor provenance"}
             </button>
             {running ? (
               <span style={{ color: "var(--muted)", fontSize: "0.82rem", marginLeft: "0.75rem" }}>
@@ -344,26 +398,9 @@ function GenerateForm() {
         </Card>
       )}
 
-      {error ? (
-        <Card style={{ borderColor: "var(--danger)", background: "#231314" }}>
-          <strong style={{ color: "var(--danger)" }}>Error</strong>
-          <p style={{ margin: "0.4rem 0 0", whiteSpace: "pre-wrap" }}>{error}</p>
-        </Card>
-      ) : null}
+      {error ? <ErrorNote message={error} /> : null}
 
-      {result ? (
-        <>
-          <ProvenanceBanner
-            ensName={result.ensName}
-            blobId={result.blobId}
-            aggregatorUrl={result.aggregatorUrl}
-            hashMatch
-            sha256={result.bundle.sha256}
-          />
-          <EnsPointer ensName={result.ensName} records={Object.fromEntries(result.txs.map((t) => [t.key, t.value]))} />
-          <DossierView bundle={result.bundle} />
-        </>
-      ) : null}
+      {result ? <DossierResult data={fromGenerate(result)} source="live" /> : null}
     </div>
   );
 }
@@ -371,12 +408,29 @@ function GenerateForm() {
 function StepRow({ label, state }: { label: string; state: StepState }) {
   const icon =
     state === "done" ? "✓" : state === "active" ? <span className="spin" /> : state === "skipped" ? "–" : "○";
-  const color = state === "done" ? "var(--accent)" : state === "active" ? "var(--link)" : "var(--muted)";
+  const color = state === "done" ? "var(--good)" : state === "active" ? "var(--accent)" : "var(--faint)";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", color: state === "pending" || state === "skipped" ? "var(--muted)" : "var(--text)" }}>
       <span style={{ width: 16, textAlign: "center", color }}>{icon}</span>
       <span>{label}</span>
-      {state === "skipped" ? <span style={{ color: "var(--muted)", fontSize: "0.78rem" }}>(no document)</span> : null}
+      {state === "skipped" ? <span style={{ color: "var(--faint)", fontSize: "0.78rem" }}>(no document)</span> : null}
+    </div>
+  );
+}
+
+function ErrorNote({ message }: { message: string }) {
+  return (
+    <div
+      style={{
+        padding: "0.9rem 1.1rem",
+        borderRadius: 9,
+        border: "1px solid var(--border)",
+        borderLeft: "3px solid var(--danger)",
+        background: "var(--danger-soft)",
+      }}
+    >
+      <strong style={{ color: "var(--danger)" }}>Error</strong>
+      <p style={{ margin: "0.35rem 0 0", whiteSpace: "pre-wrap", fontSize: "0.88rem" }}>{message}</p>
     </div>
   );
 }

@@ -1,15 +1,24 @@
 :root {
-  --bg: #0e1116;
-  --panel: #161b22;
-  --panel-2: #1c232d;
-  --border: #2b333d;
-  --text: #e6edf3;
-  --muted: #9aa7b4;
-  --accent: #3fb950;
-  --accent-dim: #1f6f33;
-  --link: #58a6ff;
-  --danger: #f85149;
-  --chip: #21303f;
+  /* Calm light theme: warm near-white, dark text, ONE muted accent. */
+  --bg: #faf9f7;
+  --panel: #ffffff;
+  --panel-2: #f4f3f0;
+  --border: #e7e5e0;
+  --hairline: #ededea;
+  --text: #1f2328;
+  --muted: #6b7177;
+  --faint: #9a9ea3;
+
+  /* Single muted accent (slate teal-green) used for links + quiet success. */
+  --accent: #3a6b5a;
+  --accent-soft: #eef3f1;
+  --link: #34655a;
+
+  /* Muted status colors — no neon. */
+  --good: #3a6b5a;
+  --good-soft: #eef3f1;
+  --danger: #9d4038;
+  --danger-soft: #f8efed;
 }
 
 * {
@@ -23,7 +32,9 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  line-height: 1.5;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern", "liga";
 }
 
 a {
@@ -34,10 +45,12 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Monospace ONLY for hashes / IDs — small and secondary. */
 code,
 .mono {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 0.85em;
+  font-size: 0.8em;
+  color: var(--muted);
   word-break: break-all;
 }
 
@@ -47,7 +60,7 @@ button {
 }
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 input[type="text"],
@@ -56,14 +69,15 @@ input[type="file"] {
   font: inherit;
   width: 100%;
   padding: 0.55rem 0.7rem;
-  background: var(--panel-2);
+  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 7px;
   color: var(--text);
 }
-input:focus {
+input:focus,
+textarea:focus {
   outline: none;
-  border-color: var(--link);
+  border-color: var(--accent);
 }
 
 label {
@@ -73,14 +87,22 @@ label {
   margin: 0 0 0.35rem;
 }
 
+summary {
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+
 .spin {
   display: inline-block;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border: 2px solid var(--border);
-  border-top-color: var(--link);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+  vertical-align: -1px;
 }
 @keyframes spin {
   to {

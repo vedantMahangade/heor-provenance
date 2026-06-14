@@ -1,0 +1,10 @@
+<svg width="232" height="52" viewBox="0 0 232 52" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lineage">
+  <!-- lineage mark: a chain of custody descending to a verified node -->
+  <line x1="16" y1="13" x2="16" y2="39" stroke="#2E6F4E" stroke-width="2.4"/>
+  <circle cx="16" cy="13" r="4.4" fill="#FBFAF7" stroke="#2E6F4E" stroke-width="2.4"/>
+  <circle cx="16" cy="26" r="4.4" fill="#FBFAF7" stroke="#2E6F4E" stroke-width="2.4"/>
+  <circle cx="16" cy="39" r="6" fill="#2E6F4E"/>
+  <path d="M13.1 39.2 L15.2 41.3 L19 37.1" fill="none" stroke="#FBFAF7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- wordmark -->
+  <text x="40" y="34" font-family="'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#1B2A24">Lineage</text>
+</svg>
