@@ -25,6 +25,8 @@ export interface GenerateOptions {
   maxSources?: number;
   /** Optional explicit PubMed query; defaults to "<drug> <indication>". */
   query?: string;
+  /** Optional GVD section focus appended to the drafting prompt. */
+  focus?: string;
   /** Inject an LLM config (defaults to env). */
   llmConfig?: LlmConfig;
   /** ISO timestamp override (mainly for deterministic tests). */
@@ -56,7 +58,7 @@ export async function generateEvidenceBundle(
 
   // 2. Draft grounded claims with the LLM.
   const llmConfig = opts.llmConfig ?? getLlmConfig();
-  const draft = await draftClaims(drug, indication, sources, llmConfig);
+  const draft = await draftClaims(drug, indication, sources, llmConfig, opts.focus);
 
   // 3. Independently verify each claim's grounding, then keep only the sources
   //    actually cited by surviving claims.
@@ -92,6 +94,7 @@ async function draftClaims(
   indication: string,
   sources: Source[],
   llmConfig: LlmConfig,
+  focus?: string,
 ): Promise<DraftResponse> {
   const withAbstracts = sources.filter((s) => s.abstract);
   if (withAbstracts.length === 0) {
@@ -101,7 +104,7 @@ async function draftClaims(
   const client = createLlmClient(llmConfig);
   const response = await chatJson<DraftResponse>(client, llmConfig.model, {
     system: DRAFTING_SYSTEM_PROMPT,
-    user: buildDraftingUserPrompt(drug, indication, withAbstracts),
+    user: buildDraftingUserPrompt(drug, indication, withAbstracts, focus),
   });
 
   return { claims: Array.isArray(response?.claims) ? response.claims : [] };

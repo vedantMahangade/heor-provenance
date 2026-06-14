@@ -1,154 +1,101 @@
-# HEOR Provenance Agent
+# Lineage
 
-**Grounded drafting of pharma value-dossier sections, where every claim is independently verifiable and every artifact is tamper-evident.**
+HEOR Provenance Agent
 
-Built at ETHGlobal New York 2026. The product is not the text generation — it's the **provenance and verification layer** that makes AI-drafted evidence usable in a regulated setting.
+Lineage drafts a single, targeted chapter of a pharmaceutical value dossier and makes every claim in it checkable. You give it a source document of your own, it pulls supporting literature from PubMed, drafts the chapter with inline citations, and then checks each of those citations against its source before you read a word of it. The finished chapter is hashed and published so anyone can confirm later that it was not altered.
 
-> Try it yourself: open the Verify view, enter **`heor-prov.eth`**, and watch the system resolve the name → pull the evidence bundle from decentralized storage → recompute its hash → confirm nothing was altered. You don't have to trust the server.
+Built at ETHGlobal New York 2026.
 
----
-
-## Quickstart (zero config — no keys, no wallet)
-
-```bash
-git clone <repo-url>
-cd heor-provenance
-npm install
-npm run dev
-# open http://localhost:3000
-```
-
-You land on the **Verify** view showing a real, previously published dossier (`heor-prov.eth`) rendered from a bundled snapshot — **with no environment variables set.** From there:
-
-1. **Click an inline `[PMID]` citation** on any claim to open its exact PubMed source (hover to preview the supporting sentence).
-2. Skim the **“N/N claims grounded; ungrounded dropped”** line, the Walrus **blobId**, and the Chainlink **confidential attestation** block (model, AWS Nitro enclave, the three digests).
-3. Press **“Verify live on-chain”** to run the real ENS → Walrus → re-hash round trip and see the live `sha256` match. (Reads default to a public Sepolia RPC, so this works on a clean clone.)
-4. **Edit any claim's text and hit “Re-verify”** → the hash breaks and the banner flips to **“PROVENANCE FAILED — content altered, hash no longer matches,”** with before/after hashes. **Reset** restores it.
-
-**Generate** (drafting a *new* dossier) is **optional and requires API keys + a funded Sepolia key** — see [Generate (requires keys)](#generate-requires-keys). Without keys, the Generate tab just explains what's needed; nothing errors.
-
----
+Quick look: open the app, stay on the Verify tab, and load the example. You get a finished chapter, a banner saying how many of its citations were verified against their sources, and a chain of custody you can follow back to the original bytes. None of that needs a key or a wallet.
 
 ## The problem
 
-Health Economics & Outcomes Research (HEOR) teams compile **Global Value Dossiers (GVDs)** — the evidence story a drug uses to win reimbursement. Drafting them is slow and expert-heavy, and LLMs are an obvious accelerant. A 2024 ISPOR study (IQVIA) found LLM-generated GVD chapters were rated good enough to fold into real dossier development by subject-matter experts — *but only with manual checking, and with hallucinations present, concluding that SME review is essential.* More broadly, HTA bodies and regulators (NICE, FDA, EMA, and an ISPOR generative-AI working group) are converging on the same requirement: if AI touches the evidence, you need **transparency, reproducibility, human oversight, and an audit trail.**
+Health economics teams write Global Value Dossiers, the evidence packages a drug uses to win reimbursement. They are long and slow to produce, so large language models are an obvious way to speed them up. The catch is trust. A 2024 ISPOR study from IQVIA had subject matter experts review dossier chapters drafted by an LLM. They found the output good enough to build on, but only with manual checking, and with hallucinations present, and they concluded that expert review is essential. Guidance from NICE, the FDA, the EMA, and an ISPOR working group points the same way: if AI touches the evidence, you need traceability, human oversight, and an audit trail.
 
-That last requirement is the gap. The blocker isn't whether AI can draft — it's that in a regulated workflow you can't use an AI claim unless you can prove **(a)** exactly which source it came from and **(b)** that nothing was altered after the fact. *If you can't trace the lineage, you can't use it.*
-
-This project builds that missing layer.
+So the hard part is not the drafting. It is proving that each claim came from a real source that actually supports it, and that nothing was changed afterward. If you cannot trace the lineage, you cannot use it. That is the gap this fills.
 
 ## What it does
 
-Given a drug and an indication, it:
+You provide a drug, an indication, an optional focus (the section or angle you want), and your own source document. That document can be confidential, for example unpublished trial data you would never paste into a public chatbot.
 
-1. Pulls **real PubMed abstracts** as evidence.
-2. Drafts dossier claims where **each claim is tied to one PMID and the exact supporting sentence**; claims that can't be grounded are flagged or dropped (human-in-the-loop, not autonomous authoring).
-3. Optionally analyzes a **confidential, pre-publication document** (e.g. embargoed trial data) inside a trusted execution environment, so private evidence never leaks — and attaches the enclave attestation.
-4. Bundles everything, hashes it, stores it on decentralized storage, and publishes a human-readable pointer to it.
-5. Lets anyone **verify the whole chain** from a single name — no trust in our server required.
+1. It fetches abstracts for the drug and indication from PubMed.
+2. It sends those abstracts and your document into a confidential enclave, which drafts the chapter with inline citations. Your document never leaves the enclave and never reaches a public model.
+3. It checks every citation. For each cited PMID it compares the sentence against the real abstract and marks the citation as verified or flagged for review.
+4. It hashes the whole package, stores it, and publishes a pointer to it so the result can be checked by anyone later.
 
-## Architecture — three chains, three distinct jobs
+The citation check is the part that matters. The model writes fluent prose and attributes it poorly, so Lineage does not take its word for any citation. It verifies each one and shows the score, for example "9 of 13 citations verified against source, 4 flagged for review." Drafting is the model's job. Verifying is the tool's job.
+
+## How verification works
 
 ```mermaid
-flowchart LR
-    A["Drug + Indication<br/>(+ optional confidential doc)"] --> B["PubMed E-utilities<br/>fetch abstracts"]
-    B --> C["LLM: claim-level<br/>grounded drafting<br/>(claim ↔ PMID + sentence)"]
-    D["Confidential doc"] -.optional.-> E["Chainlink Confidential AI<br/>TEE inference + attestation"]
-    C --> F["Evidence Bundle<br/>{claims, sources, model,<br/>version, timestamp,<br/>attestation?, sha256}"]
-    E -.digests.-> F
-    F --> G["SHA-256 over all<br/>fields except sha256"]
-    G --> H["Walrus<br/>store bundle bytes<br/>→ blobId"]
-    H --> I["ENS text records<br/>heor.dossier.latest = blobId<br/>+ agent version / capabilities"]
-
-    I --> V1["VERIFY: resolve ENS name"]
-    V1 --> V2["read blobId"]
-    V2 --> V3["fetch bundle from Walrus"]
-    V3 --> V4["recompute SHA-256<br/>and compare"]
-    V4 --> V5["PROVENANCE VERIFIED ✓"]
+flowchart TD
+    A["Drug, indication, focus, your document"] --> B["Fetch PubMed abstracts"]
+    A --> C["Your document stays confidential"]
+    B --> D["Chainlink enclave drafts the chapter with inline PMID citations"]
+    C --> D
+    D --> E["Check each citation against its abstract: verified or flagged"]
+    E --> F["Hash the bundle"]
+    F --> G["Store on Walrus, get a blob id"]
+    G --> H["Publish the blob id in ENS records"]
+    H --> I["Anyone resolves the name, fetches from Walrus, recomputes the hash"]
 ```
 
-| Layer | Chain | Job |
-|---|---|---|
-| **Storage** | **Walrus (Sui)** | Stores the evidence-bundle bytes on tamper-evident decentralized storage; the content hash makes any alteration detectable. |
-| **Identity / pointer** | **ENS (Sepolia)** | A human-readable name (`heor-prov.eth`) whose text records point to the latest bundle and publish the agent's version + capabilities. |
-| **Confidential compute** | **Chainlink Confidential AI Attester** | Runs inference over sensitive inputs inside an AWS Nitro enclave and returns content/request/response **digests** — proof the AI step ran on the stated input without leaking it. |
+Three networks do three jobs.
 
-## The loop, in detail
+ENS holds a human readable name and a small set of records that point to the current evidence bundle. It is the entry point, and it ties that pointer to an owner with no server of ours in the path. To check a dossier you start from the name, read the record, and follow it.
 
-**Generate** (`npm run generate-full` / `POST /api/generate`):
-drug + indication → PubMed abstracts → claim-level grounded claims → *(if a confidential doc is supplied)* Chainlink TEE inference + attestation → assemble bundle → SHA-256 → store on Walrus (`epochs ≥ 5`) → write `blobId` and agent metadata into ENS text records.
+Walrus is decentralized storage. The evidence bundle lives there, addressed by its content, so any change to the bytes would fail to match.
 
-**Verify** (`npm run verify` / `POST /api/verify`):
-resolve ENS name → read `heor.dossier.latest` (blobId) → fetch bundle from Walrus → recompute SHA-256 over all fields except `sha256` → compare → render **PROVENANCE VERIFIED**, surfacing the dossier, the grounded claims with their PMIDs, and the confidential attestation digests.
+Chainlink Confidential AI runs the drafting model inside a hardware enclave and returns attestation digests. That is how a confidential document gets analyzed without anyone seeing it, while still leaving proof of what was processed.
 
-## How it maps to the sponsor tracks
+The Verify view runs this chain live. The tamper test lets you edit a claim and watch the hash stop matching, which is the same idea made concrete.
 
-- **ENS — Integrate ENS:** functional, non-hard-coded read **and write** of ENS text records on Sepolia; the name is the discovery and integrity anchor for every dossier.
-- **Walrus (Sui) — Best new build with Walrus:** newly built; Walrus is the load-bearing storage for the verifiable evidence bundle, not a bolt-on.
-- **Chainlink — Best usage of Confidential AI Attester:** real confidential inference over sensitive inputs in the dev-preview enclave, with the attestation digests folded into the hashed bundle so the confidential step is itself verifiable.
+## Running it
 
-## Tech stack
+You do not need keys to see the project work. Clone it, install, run, and load the example on either tab.
 
-- **Next.js + TypeScript** (single repo; API routes keep all keys server-side).
-- **LLM:** provider-agnostic OpenAI-compatible client (`LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL`) — runs on Groq by default.
-- **Evidence:** PubMed E-utilities (`esearch` + `efetch`).
-- **Walrus:** testnet HTTP publisher/aggregator (no wallet needed).
-- **ENS:** Sepolia via `viem` / `@ensdomains/ensjs`.
-- **Chainlink:** Confidential AI dev-preview REST API (async submit → poll → digests).
-
-## Running it locally
-
-```bash
+```
+git clone <your repo url>
+cd lineage
 npm install
-
-# CLI: generate a dossier and publish its provenance
-npm run generate-full -- --drug semaglutide --indication "type 2 diabetes"
-# add a confidential input (SYNTHETIC data only — see note below)
-npm run generate-full -- --drug semaglutide --indication "type 2 diabetes" --sensitive ./path/to/synthetic-doc.txt
-
-# verify any published dossier from its ENS name alone
-npm run verify -- --name heor-prov.eth
-
-# run the web app
 npm run dev
 ```
 
-## Generate (requires keys)
+Open http://localhost:3000. The Verify tab reads from a bundled example and a public Sepolia endpoint, so it works on a fresh clone with nothing configured. The citation view and the tamper test work offline.
 
-The **Verify** demo above needs no configuration. Drafting a *new* dossier — the **Generate** tab and `npm run generate-full` — calls an LLM and writes to Walrus + ENS, so it needs the keys below. If they're absent, the Generate tab shows a short "needs keys" message instead of erroring.
+A live generation needs keys, because it calls the Chainlink enclave, PubMed, Walrus, and ENS. Put them in a local `.env` (which is never committed) or in your host's dashboard.
 
-### Environment variables
+Required for live generation:
 
-Set these locally in `.env` (never commit it — the repo is public) and in the Vercel dashboard for deployment.
-
-**Required**
-- `LLM_BASE_URL` — e.g. `https://api.groq.com/openai/v1`
-- `LLM_API_KEY`
-- `LLM_MODEL` — e.g. `llama-3.3-70b-versatile`
-- `SEPOLIA_RPC_URL` — your own Alchemy/Infura Sepolia endpoint
-- `ENS_PRIVATE_KEY` — the throwaway Sepolia key that owns the ENS name
-- `ENS_NAME` — e.g. `heor-prov.eth`
-
-**Required only for the confidential-document feature**
 - `CHAINLINK_CONF_AI_KEY`
+- `SEPOLIA_RPC_URL` (your own Alchemy or Infura Sepolia endpoint)
+- `ENS_PRIVATE_KEY` (the throwaway Sepolia key that owns the name)
+- `ENS_NAME` (for example `heor-prov.eth`)
 
-**Optional (sensible defaults in code)**
+Optional, with working defaults in code:
+
 - `CHAINLINK_CONF_AI_URL`, `WALRUS_PUBLISHER`, `WALRUS_AGGREGATOR`, `NCBI_API_KEY`, `NCBI_TOOL`, `NCBI_EMAIL`
 
-> **Deploy note:** the generate flow runs 1–2 minutes, which exceeds Vercel's Hobby 60 s function limit, so `/api/generate` needs Pro (or extended/Fluid compute). `/api/verify` runs fine on any plan — the recommended demo path is to pre-generate from the CLI and use the deployed Verify view live.
+See `.env.example` for the full list and where each value comes from.
 
-## Honest scope & limitations
+## Live demo
 
-- **Augmentation, not automation.** This drafts grounded claims for human review; it does not autonomously author regulatory submissions. The verifiability layer is the point.
-- **Synthetic data only for confidential inputs.** The Chainlink Confidential AI dev preview may log inputs, so never send real PHI — use fabricated documents.
-- **Testnets.** ENS is on Sepolia and Walrus/Chainlink are on testnet/dev-preview; this is a proof of concept, not production.
-- **ENS v2 transition:** the name lives in the ENS v2 Sepolia deployment. If Sepolia state is reset by a redeploy, re-run `ens-find-controller` → `ens-register` → `ens-write` to re-mint and rewrite the records.
+Hosted at <your deployed url>. The Verify tab works for anyone. Generate needs the keys above and takes one to two minutes, since it waits on the enclave.
+
+One note on the enclave: it is a developer preview, and its availability comes and goes. If a live generation hangs, that is the preview being slow or down, not the app, and the example path stays instant regardless. Use synthetic documents only on the generate path, because the preview may log inputs.
+
+## Scope
+
+Lineage drafts one targeted chapter, not a whole dossier. A real GVD runs to a hundred pages or more, and producing the entire thing is neither realistic here nor the point. The focus field selects the section. The value is that the section it produces is grounded and independently checked.
+
+This is a proof of concept on test networks. ENS is on Sepolia. Walrus and Chainlink run on testnet and developer preview. It assists a human writer rather than replacing one.
+
+## Tech
+
+Next.js and TypeScript. PubMed E-utilities for evidence. Walrus testnet HTTP for storage. ENS on Sepolia through viem and ensjs. Chainlink Confidential AI developer preview for the enclave. Document parsing with mammoth for Word, pdf-parse for PDF, and plain reads for text.
 
 ## References
 
-- IQVIA / ISPOR Europe 2024 — *Evaluating LLM Performance in Content Generation for Global Value Dossiers* (poster MSR110).
-- IntuitionLabs — *LLMs for Clinical Evidence: Automating Economic Dossiers* (review of TrialMind, AI-LES, Reason et al., and NICE/FDA/EMA/ISPOR guidance).
+IQVIA, ISPOR Europe 2024. Evaluating LLM Performance in Content Generation for Global Value Dossiers (poster MSR110).
 
----
-
-*[FILL IN before submitting: repo URL, author name, deployed app URL, ≤5-min demo video link, and a LICENSE.]*
+IntuitionLabs. LLMs for Clinical Evidence: Automating Economic Dossiers.

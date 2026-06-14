@@ -1,0 +1,36 @@
+CONFIDENTIAL — PRE-PUBLICATION / EMBARGOED
+SYNTHETIC DATA — FABRICATED FOR DEMONSTRATION ONLY. NOT REAL TRIAL DATA. DO NOT CITE.
+
+Sponsor: Aldergate Biopharma (fictional)
+Study ID: ALD-OB-204 ("ASCEND-Weight")
+Compound: tirzepatide (investigational maintenance-dose regimen)
+Indication: chronic weight management in adults with obesity (BMI >= 30), without type 2 diabetes
+Status: Topline results — EMBARGOED until congress presentation. Internal value-evidence use only.
+
+STUDY DESIGN
+Phase 3, randomized, double-blind, placebo-controlled, 72-week trial.
+N = 1,936 adults with obesity (mean baseline BMI 38.4, mean weight 104 kg) and at least one
+weight-related comorbidity, without type 2 diabetes. Randomized 1:1:1 to tirzepatide 10 mg,
+tirzepatide 15 mg, or placebo, each plus lifestyle intervention.
+
+PRIMARY ENDPOINT — mean percent change in body weight at week 72
+  Tirzepatide 15 mg:  -22.1% (95% CI -23.0 to -21.2)
+  Tirzepatide 10 mg:  -19.4%
+  Placebo:            -2.8%
+
+KEY SECONDARY ENDPOINTS
+  Patients achieving >= 20% weight reduction:   61% (15 mg) vs 5% (placebo)
+  Waist circumference change:                   -18.3 cm (15 mg) vs -3.1 cm
+  Systolic blood pressure change:               -8.2 mmHg vs -1.0 mmHg
+  HbA1c change (prediabetes subgroup):          -0.5% vs -0.1%
+
+SAFETY
+  Gastrointestinal adverse events (nausea, diarrhea, constipation): 56% (15 mg) vs 18% (placebo);
+  mostly mild-to-moderate and concentrated during dose escalation.
+  Discontinuation due to adverse events: 7.1% (15 mg) vs 2.4% (placebo).
+  No new safety signals; no cases of medullary thyroid carcinoma reported.
+
+EMBARGO NOTICE
+Unpublished and under embargo. Do not disclose externally until presented. This is fabricated
+synthetic data created solely to demonstrate confidential-document handling and contains no real
+patient or trial information.

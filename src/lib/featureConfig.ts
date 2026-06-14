@@ -14,10 +14,10 @@ export interface FeatureConfig {
   missing: string[];
 }
 
+// The cited-chapter flow drafts inside the confidential enclave (no public LLM),
+// stores on Walrus (public endpoints), and pins provenance to ENS on Sepolia.
 const REQUIRED_FOR_GENERATE = [
-  "LLM_BASE_URL",
-  "LLM_API_KEY",
-  "LLM_MODEL",
+  "CHAINLINK_CONF_AI_KEY",
   "ENS_PRIVATE_KEY",
   "ENS_NAME",
 ] as const;

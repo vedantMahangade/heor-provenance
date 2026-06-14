@@ -47,6 +47,8 @@ export interface Claim {
 export interface DossierQuery {
   drug: string;
   indication: string;
+  /** Optional GVD section the chapter was targeted at (e.g. "Clinical value"). */
+  focus?: string;
 }
 
 /**
@@ -75,6 +77,18 @@ export interface ConfidentialAttestation {
  */
 export interface EvidenceBundle {
   query: DossierQuery;
+  /**
+   * The drafted GVD chapter as markdown prose with inline [PMID nnnn] citations.
+   * Written entirely inside the confidential enclave; this is the human-facing
+   * deliverable. Empty string for legacy claim-only bundles.
+   */
+  chapter?: string;
+  /**
+   * One record per inline [PMID] citation in `chapter`, in citation order. Each
+   * carries the verbatim supporting sentence the enclave attributed to that
+   * source; OUR verifier independently confirms it against the abstract, so a
+   * mis-attributed citation lands as `flagged` even though the PMID is real.
+   */
   claims: Claim[];
   sources: Source[];
   model: string;

@@ -2,57 +2,139 @@
   "verified": true,
   "hashMatch": true,
   "ensName": "heor-prov.eth",
-  "blobId": "AoWrV993BSsOJ0sq8FkjPyF1AyvSDVbE5ZYk9EEo_yA",
+  "blobId": "v6v1fdI6JD7oiKiOeCcs0H-2SkeFh6sr4Twl48qBLhE",
   "resolver": "0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5",
   "records": {
-    "heor.dossier.latest": "AoWrV993BSsOJ0sq8FkjPyF1AyvSDVbE5ZYk9EEo_yA",
+    "heor.dossier.latest": "v6v1fdI6JD7oiKiOeCcs0H-2SkeFh6sr4Twl48qBLhE",
     "heor.agent.version": "heor-provenance/0.1.0",
-    "heor.agent.capabilities": "pubmed-grounded-drafting,claim-level-verification,walrus-storage,sha256-provenance,confidential-ai-attestation"
+    "heor.agent.capabilities": "pubmed-evidence,confidential-chapter-drafting,citation-level-verification,walrus-storage,sha256-provenance,confidential-ai-attestation"
   },
-  "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space/v1/blobs/AoWrV993BSsOJ0sq8FkjPyF1AyvSDVbE5ZYk9EEo_yA",
+  "aggregatorUrl": "https://aggregator.walrus-testnet.walrus.space/v1/blobs/v6v1fdI6JD7oiKiOeCcs0H-2SkeFh6sr4Twl48qBLhE",
   "dossier": {
     "query": {
       "drug": "semaglutide",
-      "indication": "type 2 diabetes"
+      "indication": "type 2 diabetes",
+      "focus": "Clinical value, payer-facing"
     },
+    "chapter": "# Clinical Value and Payer Perspective: Semaglutide in Type 2 Diabetes\n\nSemaglutide, a potent once-weekly glucagon-like peptide-1 receptor agonist (GLP-1 RA), represents a significant advancement in the management of type 2 diabetes mellitus (T2DM) by offering comprehensive benefits in glycemic control, weight management, and cardiovascular risk reduction. Its mechanism of action involves stimulating insulin secretion and decreasing appetite [PMID 30615985].\n\n## Efficacy in Glycemic and Weight Control\n\nClinical data demonstrate that semaglutide is highly effective in achieving and sustaining glycemic targets. Compared with placebo, subcutaneous semaglutide 0.5 and 1 mg reduced HbA1c by 1.01% (95% CI, 0.56-1.47) and 1.38% (1.05-1.70), respectively [PMID 29756388]. Furthermore, semaglutide consistently demonstrated superior and sustained glycemic control and weight loss vs. all comparators evaluated [PMID 30615985]. \n\nIn terms of weight loss, semaglutide demonstrates a beneficial effect on body weight (mean difference vs placebo -4.11 kg, 95% CI -4.85 to -3.37 for semaglutide 1 mg) and systolic blood pressure [PMID 29756388]. While some direct comparative studies indicate that tirzepatide demonstrates a higher impact on weight loss than semaglutide [PMID 40184508], semaglutide itself provides clinically meaningful reductions in body mass index [PMID 30615985].\n\n## Cardiovascular and Metabolic Outcomes\n\nOne of the most critical values of semaglutide for payers is its demonstrated cardiovascular benefit. In trials involving patients at high risk of cardiovascular disease, semaglutide significantly decreased the occurrence of cardiovascular events compared with placebo/standard of care (hazard ratio 0.74, P<0.001 for non-inferiority) [PMID 30615985]. This benefit is further reinforced by its role in lowering blood pressure and facilitating overall metabolic health [PMID 29756388].\n\n## Safety and Tolerability Profile\n\nSemaglutide is generally well-tolerated, though it is associated with gastrointestinal adverse events [PMID 29756388]. The most frequently reported adverse event in some studies were gastrointestinal disorders, which were also the most common reason for discontinuing treatment [PMID 29397376]. \n\nRegarding serious adverse events, neither tirzepatide nor semaglutide increased the risk of serious adverse events or severe hypoglycaemia [PMID 38613667]. While meta-analyses indicate that overall semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33) [PMID 34894326], caution is warranted, as subgroup analysis showed that semaglutide was associated with an increased risk of DR compared with placebo (RR 1.24, 95% CI 1.03-1.50) [PMID 34894326].\n\n## Conclusion\n\nSemaglutide provides a robust clinical profile in T2DM management, offering superior and sustained glycemic and weight control, alongside proven benefits in cardiovascular risk reduction. Its established safety profile allows it to be a cornerstone therapy for patients requiring improved long-term metabolic health.",
     "claims": [
       {
-        "id": "claim-1",
-        "text": "Semaglutide consistently demonstrated superior and sustained glycemic control and weight loss compared to all evaluated comparators.",
+        "id": "cite-1",
+        "text": "Its mechanism of action involves stimulating insulin secretion and decreasing appetite [PMID 30615985]. ## Efficacy in Glycemic and Weight Control Clinical data demonstrate that semaglutide is highly effective in achieving and sustaining glycemic targets.",
         "pmid": "30615985",
         "supportingSentence": "Semaglutide consistently demonstrated superior and sustained glycemic control and weight loss vs. all comparators evaluated.",
         "status": "grounded"
       },
       {
-        "id": "claim-2",
-        "text": "Semaglutide was superior to dulaglutide in improving glycemic control and reducing body weight at both low and high doses.",
-        "pmid": "29397376",
-        "supportingSentence": "At low and high doses, semaglutide was superior to dulaglutide in improving glycaemic control and reducing bodyweight, enabling a significantly greater number of patients with type 2 diabetes to achieve clinically meaningful glycaemic targets and weight loss, with a similar safety profile.",
-        "status": "grounded"
-      },
-      {
-        "id": "claim-3",
-        "text": "Semaglutide reduced HbA1c by 1.01% and 1.38% compared to placebo at doses of 0.5 mg and 1 mg, respectively.",
+        "id": "cite-2",
+        "text": "Compared with placebo, subcutaneous semaglutide 0.5 and 1 mg reduced HbA1c by 1.01% (95% CI, 0.56-1.47) and 1.38% (1.05-1.70), respectively [PMID 29756388].",
         "pmid": "29756388",
         "supportingSentence": "Compared with placebo, subcutaneous semaglutide 0.5 and 1 mg reduced HbA1c by 1.01% (95% CI, 0.56-1.47) and 1.38% (1.05-1.70), respectively.",
         "status": "grounded"
       },
       {
-        "id": "claim-4",
-        "text": "Semaglutide was associated with a significantly reduced risk of first-time Alzheimer's disease diagnosis compared to other antidiabetic medications.",
-        "pmid": "39445596",
-        "supportingSentence": "Semaglutide was associated with significantly reduced risk for first-time AD diagnosis, most strongly compared with insulin (hazard ratio [HR], 0.33 [95% CI: 0.21 to 0.51]) and most weakly compared with other GLP-1RAs (HR, 0.59 [95% CI: 0.37 to 0.95]).",
+        "id": "cite-3",
+        "text": "Furthermore, semaglutide consistently demonstrated superior and sustained glycemic control and weight loss vs. all comparators evaluated [PMID 30615985].",
+        "pmid": "30615985",
+        "supportingSentence": "Semaglutide also decreases energy intake by reducing appetite and food cravings, and lowering relative preference for fatty, energy-dense foods.",
         "status": "grounded"
       },
       {
-        "id": "claim-5",
-        "text": "Semaglutide was not associated with an increased risk of diabetic retinopathy compared to controls when all trials were combined.",
+        "id": "cite-4",
+        "text": "In terms of weight loss, semaglutide demonstrates a beneficial effect on body weight (mean difference vs placebo -4.11 kg, 95% CI -4.85 to -3.37 for semaglutide 1 mg) and systolic blood pressure [PMID 29756388].",
+        "pmid": "29756388",
+        "supportingSentence": "Semaglutide also had a beneficial effect on body weight (mean difference vs placebo -4.11 kg, 95% CI -4.85 to -3.37 for semaglutide 1 mg) and systolic blood pressure.",
+        "status": "grounded"
+      },
+      {
+        "id": "cite-5",
+        "text": "While some direct comparative studies indicate that tirzepatide demonstrates a higher impact on weight loss than semaglutide [PMID 40184508], semaglutide itself provides clinically meaningful reductions in body mass index [PMID 30615985]. ## Cardiovascular and Metabolic Outcomes One of the most critical values of semaglutide for payers is its demonstrated cardiovascular benefit.",
+        "pmid": "40184508",
+        "supportingSentence": "",
+        "status": "flagged",
+        "flagReason": "No supporting sentence was provided for PMID 40184508."
+      },
+      {
+        "id": "cite-6",
+        "text": "While some direct comparative studies indicate that tirzepatide demonstrates a higher impact on weight loss than semaglutide [PMID 40184508], semaglutide itself provides clinically meaningful reductions in body mass index [PMID 30615985]. ## Cardiovascular and Metabolic Outcomes One of the most critical values of semaglutide for payers is its demonstrated cardiovascular benefit.",
+        "pmid": "30615985",
+        "supportingSentence": "In SUSTAIN 6, involving patients at high risk of cardiovascular disease, semaglutide significantly decreased the occurrence of cardiovascular events compared with placebo/standard of care (hazard ratio 0.74, P<0.001 for non-inferiority).",
+        "status": "grounded"
+      },
+      {
+        "id": "cite-7",
+        "text": "In trials involving patients at high risk of cardiovascular disease, semaglutide significantly decreased the occurrence of cardiovascular events compared with placebo/standard of care (hazard ratio 0.74, P<0.001 for non-inferiority) [PMID 30615985].",
+        "pmid": "30615985",
+        "supportingSentence": "",
+        "status": "flagged",
+        "flagReason": "No supporting sentence was provided for PMID 30615985."
+      },
+      {
+        "id": "cite-8",
+        "text": "This benefit is further reinforced by its role in lowering blood pressure and facilitating overall metabolic health [PMID 29756388]. ## Safety and Tolerability Profile Semaglutide is generally well-tolerated, though it is associated with gastrointestinal adverse events [PMID 29756388].",
+        "pmid": "29756388",
+        "supportingSentence": "",
+        "status": "flagged",
+        "flagReason": "No supporting sentence was provided for PMID 29756388."
+      },
+      {
+        "id": "cite-9",
+        "text": "This benefit is further reinforced by its role in lowering blood pressure and facilitating overall metabolic health [PMID 29756388]. ## Safety and Tolerability Profile Semaglutide is generally well-tolerated, though it is associated with gastrointestinal adverse events [PMID 29756388].",
+        "pmid": "29756388",
+        "supportingSentence": "",
+        "status": "flagged",
+        "flagReason": "No supporting sentence was provided for PMID 29756388."
+      },
+      {
+        "id": "cite-10",
+        "text": "The most frequently reported adverse event in some studies were gastrointestinal disorders, which were also the most common reason for discontinuing treatment [PMID 29397376].",
+        "pmid": "29397376",
+        "supportingSentence": "Gastrointestinal disorders were the most frequently reported adverse event, occurring in 129 (43%) of 301 patients receiving semaglutide 0.5 mg, 133 (44%) of 300 patients receiving semaglutide 1.0 mg, 100 (33%) of 299 patients receiving dulaglutide 0.75 mg, and in 143 (48%) of 299 patients receiving dulaglutide 1.5 mg.",
+        "status": "grounded"
+      },
+      {
+        "id": "cite-11",
+        "text": "Regarding serious adverse events, neither tirzepatide nor semaglutide increased the risk of serious adverse events or severe hypoglycaemia [PMID 38613667].",
+        "pmid": "38613667",
+        "supportingSentence": "Both drugs increased incidence of gastrointestinal adverse events compared with placebo, while neither tirzepatide nor semaglutide increased the risk of serious adverse events or severe hypoglycaemia.",
+        "status": "grounded"
+      },
+      {
+        "id": "cite-12",
+        "text": "While meta-analyses indicate that overall semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33) [PMID 34894326], caution is warranted, as subgroup analysis showed that semaglutide was associated with an increased risk of DR compared with placebo (RR 1.24, 95% CI 1.03-1.50) [PMID 34894326]. ## Conclusion Semaglutide provides a robust clinical profile in T2DM management, offering superior and sustained glycemic and weight control, alongside proven benefits in cardiovascular risk reduction.",
         "pmid": "34894326",
         "supportingSentence": "Overall, semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33).",
+        "status": "grounded"
+      },
+      {
+        "id": "cite-13",
+        "text": "While meta-analyses indicate that overall semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33) [PMID 34894326], caution is warranted, as subgroup analysis showed that semaglutide was associated with an increased risk of DR compared with placebo (RR 1.24, 95% CI 1.03-1.50) [PMID 34894326]. ## Conclusion Semaglutide provides a robust clinical profile in T2DM management, offering superior and sustained glycemic and weight control, alongside proven benefits in cardiovascular risk reduction.",
+        "pmid": "34894326",
+        "supportingSentence": "Subgroup analysis showed that semaglutide was associated with an increased risk of DR compared with placebo (RR 1.24, 95% CI 1.03-1.50).",
         "status": "grounded"
       }
     ],
     "sources": [
+      {
+        "pmid": "38613667",
+        "title": "Subcutaneously administered tirzepatide vs semaglutide for adults with type 2 diabetes: a systematic review and network meta-analysis of randomised controlled trials.",
+        "abstract": "AIMS/HYPOTHESIS: We conducted a systematic review and network meta-analysis to compare the efficacy and safety of s.c. administered tirzepatide vs s.c. administered semaglutide for adults of both sexes with type 2 diabetes mellitus. METHODS: We searched PubMed and Cochrane up to 11 November 2023 for RCTs with an intervention duration of at least 12 weeks assessing s.c. tirzepatide at maintenance doses of 5 mg, 10 mg or 15 mg once weekly, or s.c. semaglutide at maintenance doses of 0.5 mg, 1.0 mg or 2.0 mg once weekly, in adults with type 2 diabetes, regardless of background glucose-lowering treatment. Eligible trials compared any of the specified doses of tirzepatide and semaglutide against each other, placebo or other glucose-lowering drugs. Primary outcomes were changes in HbAand body weight from baseline. Secondary outcomes were achievement of HbAtarget of &#x2264;48 mmol/mol (&#x2264;6.5%) or <53 mmol/mol (<7.0%), body weight loss of at least 10%, and safety outcomes including gastrointestinal adverse events and severe hypoglycaemia. We used version 2 of the Cochrane risk-of-bias tool (ROB 2) to assess the risk of bias, conducted frequentist random-effects network meta-analyses and evaluated confidence in effect estimates utilising the Confidence In Network Meta-Analysis (CINeMA) framework. RESULTS: A total of 28 trials with 23,622 participants (44.2% female) were included. Compared with placebo, tirzepatide 15 mg was the most efficacious treatment in reducing HbA(mean difference -21.61 mmol/mol [-1.96%]) followed by tirzepatide 10 mg (-20.19 mmol/mol [-1.84%]), semaglutide 2.0 mg (-17.74 mmol/mol [-1.59%]), tirzepatide 5 mg (-17.60 mmol/mol [-1.60%]), semaglutide 1.0 mg (-15.25 mmol/mol [-1.39%]) and semaglutide 0.5 mg (-12.00 mmol/mol [-1.09%]). In between-drug comparisons, all tirzepatide doses were comparable with semaglutide 2.0 mg and superior to semaglutide 1.0 mg and 0.5 mg. Compared with placebo, tirzepatide was more efficacious than semaglutide for reducing body weight, with reductions ranging from 9.57 kg (tirzepatide 15 mg) to 5.27 kg (tirzepatide 5 mg). Semaglutide had a less pronounced effect, with reductions ranging from 4.97 kg (semaglutide 2.0 mg) to 2.52 kg (semaglutide 0.5 mg). In between-drug comparisons, tirzepatide 15 mg, 10 mg and 5 mg demonstrated greater efficacy than semaglutide 2.0 mg, 1.0 mg and 0.5 mg, respectively. Both drugs increased incidence of gastrointestinal adverse events compared with placebo, while neither tirzepatide nor semaglutide increased the risk of serious adverse events or severe hypoglycaemia. CONCLUSIONS/INTERPRETATION: Our data show that s.c. tirzepatide had a more pronounced effect on HbAand weight reduction compared with s.c. semaglutide in people with type 2 diabetes. Both drugs, particularly higher doses of tirzepatide, increased gastrointestinal adverse events. REGISTRATION: PROSPERO registration no. CRD42022382594.",
+        "journal": "Diabetologia",
+        "year": "2024",
+        "authors": [
+          "Karagiannis T",
+          "Malandris K",
+          "Avgerinos I",
+          "Stamati A",
+          "Kakotrichi P",
+          "Liakos A",
+          "Vasilakou D",
+          "Kakaletsis N",
+          "Tsapas A",
+          "Bekiari E"
+        ],
+        "url": "https://pubmed.ncbi.nlm.nih.gov/38613667/"
+      },
       {
         "pmid": "30615985",
         "title": "Comparative efficacy, safety, and cardiovascular outcomes with once-weekly subcutaneous semaglutide in the treatment of type 2 diabetes: Insights from the SUSTAIN 1-7 trials.",
@@ -110,23 +192,24 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/29756388/"
       },
       {
-        "pmid": "39445596",
-        "title": "Associations of semaglutide with first-time diagnosis of Alzheimer's disease in patients with type 2 diabetes: Target trial emulation using nationwide real-world data in the US.",
-        "abstract": "INTRODUCTION: Emerging preclinical evidence suggests that semaglutide, a glucagon-like peptide receptor agonist (GLP-1RA) for type 2 diabetes mellitus (T2DM) and obesity, protects against neurodegeneration and neuroinflammation. However, real-world evidence for its ability to protect against Alzheimer's disease (AD) is lacking. METHODS: We conducted emulation target trials based on a nationwide database of electronic health records (EHRs) of 116 million US patients. Seven target trials were emulated among 1,094,761 eligible patients with T2DM who had no prior AD diagnosis by comparing semaglutide with seven other antidiabetic medications. First-ever diagnosis of AD occurred within a 3-year follow-up period and was examined using Cox proportional hazards and Kaplan-Meier survival analyses. RESULTS: Semaglutide was associated with significantly reduced risk for first-time AD diagnosis, most strongly compared with insulin (hazard ratio [HR], 0.33 [95% CI: 0.21 to 0.51]) and most weakly compared with other GLP-1RAs (HR, 0.59 [95% CI: 0.37 to 0.95]). Similar results were seen across obesity status, gender, and age groups. DISCUSSION: These findings support further studies to assess semaglutide's potential in preventing AD. HIGHLIGHTS: Semaglutide was associated with 40% to 70% reduced risks of first-time AD diagnosis in T2DM patients compared to other antidiabetic medications, including other GLP-1RAs. Semaglutide was associated with significantly lower AD-related medication prescriptions. Similar reductions were seen across obesity status, gender, and age groups. Our findings provide real-world evidence supporting the potential clinical benefits of semaglutide in mitigating AD initiation and development in patients with T2DM. These findings support further clinical trials to assess semaglutide's potential in delaying or preventing AD.",
-        "journal": "Alzheimer's & dementia : the journal of the Alzheimer's Association",
-        "year": "2024",
+        "pmid": "40184508",
+        "title": "Tirzepatide Versus Semaglutide on Weight Loss in Type 2 Diabetes Patients: A Systematic Review and Meta-Analysis of Direct Comparative Studies.",
+        "abstract": "INTRODUCTION: Glucagon-like peptide-1 receptor agonists (GLP-1RAs) have emerged as an efficacious treatment for type 2 diabetes mellitus (T2DM) and have demonstrated substantial weight loss effects. This systematic review compares two prevalent GLP-1RAs, tirzepatide and semaglutide, with their weight loss effects and rates of adverse events (AEs). METHODS: Following the Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA), a systematic search was performed in PubMed, Embase and Cochrane Library for direct comparative studies between tirzepatide and semaglutide. A meta-analysis was conducted via a random-effects model to analyse the differences in weight loss outcomes between study cohorts. RESULTS: Four studies, with 28,827 patients (14,870 tirzepatide/13,928 semaglutide), mean age of 55.7&#x2009;years (52.0 to 63.7) and mean follow-up of 35.9&#x2009;weeks (23.6 to 44.6), were included in this study. Mean weight change across four studies for tirzepatide and semaglutide was -11.4% (-15.3% to -8.27%) and -7.3% (-8.3% to -6.08%), respectively. The meta-analysis supports these findings with a mean difference of -4.84&#x2009;kg (95% CI: -6.21 to -3.47), favouring tirzepatide. The most common AEs were minor and moderate-severity gastrointestinal (GI) AEs. CONCLUSION: Current literature supports tirzepatide demonstrating a higher impact on weight loss than semaglutide, with both demonstrating high rates of minimal- to moderate-severity AEs. Further research with comparative head-to-head trials will better elucidate these weight loss effects and safety profiles.",
+        "journal": "Endocrinology, diabetes & metabolism",
+        "year": "2025",
         "authors": [
-          "Wang W",
-          "Wang Q",
-          "Qi X",
-          "Gurney M",
-          "Perry G",
-          "Volkow ND",
-          "Davis PB",
-          "Kaelber DC",
-          "Xu R"
+          "Wen J",
+          "Syed B",
+          "Nadora D",
+          "How-Volkman C",
+          "Bernstein E",
+          "Truong A",
+          "Akhtar M",
+          "Razick A",
+          "Puglisi J",
+          "Frezza E"
         ],
-        "url": "https://pubmed.ncbi.nlm.nih.gov/39445596/"
+        "url": "https://pubmed.ncbi.nlm.nih.gov/40184508/"
       },
       {
         "pmid": "34894326",
@@ -144,27 +227,27 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/34894326/"
       }
     ],
-    "model": "llama-3.3-70b-versatile",
+    "model": "gemma4",
     "version": "heor-provenance/0.1.0",
-    "timestamp": "2026-06-13T22:32:10.390Z",
+    "timestamp": "2026-06-14T03:23:50.933Z",
     "confidentialAttestation": {
       "provider": "chainlink-confidential-ai",
       "model": "gemma4",
       "enclave": "aws-nitro",
-      "contentDigest": "414531d4fb81b6511aa7334afb278180c14ba49bb1be292c5ecd0a76eab21247",
+      "contentDigest": "980ba4bb9bdac7ecf60bfa2f7734929475540e72c22c2f795bfa745cb080e73f",
       "requestDigest": "51ada1381f6eb0292ce546d26189fae0a2b424fd98ebf8b4da1527a50545f410",
-      "responseDigest": "aa1736f86b412220fbeac71e3899a9e6015a4414395f6fe3b97a5c7c25b93ffe",
-      "output": "Based on the confidential, synthetic data provided, here is a summary of the results for semaglutide in the context of type 2 diabetes with established cardiovascular disease:\n\n**Disclaimer:** This document contains synthetic, fabricated data created solely for demonstration purposes and is under strict embargo. It is not real trial data.\n\n**Study Overview:**\n*   **Study:** MER-T2D-301 (\"HORIZON-T2D\").\n*   **Compound:** Investigational extended-dose semaglutide.\n*   **Indication:** Type 2 diabetes mellitus in adults who also have established atherosclerotic cardiovascular disease.\n*   **Design:** A Phase 3, randomized, double-blind, placebo-controlled trial involving 2,148 adults.\n\n**Efficacy Results:**\n\n*   **Primary Endpoint (HbA1c Change at Week 52):**\n    *   The semaglutide treatment group showed a reduction of **-1.8%** from baseline.\n    *   The placebo group showed a reduction of **-0.3%**.\n    *   The treatment difference was **-1.5%** (highly statistically significant, p < 0.001).\n*   **Key Secondary Endpoints:**\n    *   **Body Weight:** Semaglutide resulted in a significant average weight loss of **-11.2 kg**, compared to -1.4 kg in the placebo group (a difference of -9.8 kg, p < 0.001).\n    *   **Cardiovascular Outcomes (3-point MACE):** The treatment was associated with a reduced risk of major adverse cardiovascular events (CV death, nonfatal MI, nonfatal stroke), with a Hazard Ratio (HR) of **0.74** (p = 0.003).\n    *   **Goal Attainment:** **68%** of patients on semaglutide achieved an HbA1c of less than 7.0%, compared to 21% in the placebo group.\n\n**Safety Profile:**\n\n*   **Gastrointestinal (GI) AEs:** Gastrointestinal adverse events (including nausea, vomiting, diarrhea) were reported more frequently in the semaglutide group (41% vs 16% in placebo). However, these were mostly described as mild-to-moderate and transient.\n*   **Serious Adverse Events (SAEs):** There was no significant difference in the incidence of serious adverse events between the two arms (9.1% vs 9.8%).\n*   **Overall:** No new safety signals were noted, and rates of pancreatitis and medullary thyroid events were reported as low and balanced across both groups."
+      "responseDigest": "0928e23a71db2a006c1dc342af51ebadb9a253c178dedbc396132c965b5bd1fa",
+      "output": "```json\n{\n  \"chapter\": \"# Clinical Value and Payer Perspective: Semaglutide in Type 2 Diabetes\\n\\nSemaglutide, a potent once-weekly glucagon-like peptide-1 receptor agonist (GLP-1 RA), represents a significant advancement in the management of type 2 diabetes mellitus (T2DM) by offering comprehensive benefits in glycemic control, weight management, and cardiovascular risk reduction. Its mechanism of action involves stimulating insulin secretion and decreasing appetite [PMID 30615985].\\n\\n## Efficacy in Glycemic and Weight Control\\n\\nClinical data demonstrate that semaglutide is highly effective in achieving and sustaining glycemic targets. Compared with placebo, subcutaneous semaglutide 0.5 and 1 mg reduced HbA1c by 1.01% (95% CI, 0.56-1.47) and 1.38% (1.05-1.70), respectively [PMID 29756388]. Furthermore, semaglutide consistently demonstrated superior and sustained glycemic control and weight loss vs. all comparators evaluated [PMID 30615985]. \\n\\nIn terms of weight loss, semaglutide demonstrates a beneficial effect on body weight (mean difference vs placebo -4.11 kg, 95% CI -4.85 to -3.37 for semaglutide 1 mg) and systolic blood pressure [PMID 29756388]. While some direct comparative studies indicate that tirzepatide demonstrates a higher impact on weight loss than semaglutide [PMID 40184508], semaglutide itself provides clinically meaningful reductions in body mass index [PMID 30615985].\\n\\n## Cardiovascular and Metabolic Outcomes\\n\\nOne of the most critical values of semaglutide for payers is its demonstrated cardiovascular benefit. In trials involving patients at high risk of cardiovascular disease, semaglutide significantly decreased the occurrence of cardiovascular events compared with placebo/standard of care (hazard ratio 0.74, P<0.001 for non-inferiority) [PMID 30615985]. This benefit is further reinforced by its role in lowering blood pressure and facilitating overall metabolic health [PMID 29756388].\\n\\n## Safety and Tolerability Profile\\n\\nSemaglutide is generally well-tolerated, though it is associated with gastrointestinal adverse events [PMID 29756388]. The most frequently reported adverse event in some studies were gastrointestinal disorders, which were also the most common reason for discontinuing treatment [PMID 29397376]. \\n\\nRegarding serious adverse events, neither tirzepatide nor semaglutide increased the risk of serious adverse events or severe hypoglycaemia [PMID 38613667]. While meta-analyses indicate that overall semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33) [PMID 34894326], caution is warranted, as subgroup analysis showed that semaglutide was associated with an increased risk of DR compared with placebo (RR 1.24, 95% CI 1.03-1.50) [PMID 34894326].\\n\\n## Conclusion\\n\\nSemaglutide provides a robust clinical profile in T2DM management, offering superior and sustained glycemic and weight control, alongside proven benefits in cardiovascular risk reduction. Its established safety profile allows it to be a cornerstone therapy for patients requiring improved long-term metabolic health.\",\n  \"citations\": [\n    {\n      \"pmid\": \"30615985\",\n      \"supportingSentence\": \"Semaglutide consistently demonstrated superior and sustained glycemic control and weight loss vs. all comparators evaluated.\"\n    },\n    {\n      \"pmid\": \"29756388\",\n      \"supportingSentence\": \"Compared with placebo, subcutaneous semaglutide 0.5 and 1 mg reduced HbA1c by 1.01% (95% CI, 0.56-1.47) and 1.38% (1.05-1.70), respectively.\"\n    },\n    {\n      \"pmid\": \"30615985\",\n      \"supportingSentence\": \"Semaglutide also decreases energy intake by reducing appetite and food cravings, and lowering relative preference for fatty, energy-dense foods.\"\n    },\n    {\n      \"pmid\": \"30615985\",\n      \"supportingSentence\": \"In SUSTAIN 6, involving patients at high risk of cardiovascular disease, semaglutide significantly decreased the occurrence of cardiovascular events compared with placebo/standard of care (hazard ratio 0.74, P<0.001 for non-inferiority).\"\n    },\n    {\n      \"pmid\": \"29756388\",\n      \"supportingSentence\": \"Semaglutide also had a beneficial effect on body weight (mean difference vs placebo -4.11 kg, 95% CI -4.85 to -3.37 for semaglutide 1 mg) and systolic blood pressure.\"\n    },\n    {\n      \"pmid\": \"29397376\",\n      \"supportingSentence\": \"Gastrointestinal disorders were the most frequently reported adverse event, occurring in 129 (43%) of 301 patients receiving semaglutide 0.5 mg, 133 (44%) of 300 patients receiving semaglutide 1.0 mg, 100 (33%) of 299 patients receiving dulaglutide 0.75 mg, and in 143 (48%) of 299 patients receiving dulaglutide 1.5 mg.\"\n    },\n    {\n      \"pmid\": \"38613667\",\n      \"supportingSentence\": \"Both drugs increased incidence of gastrointestinal adverse events compared with placebo, while neither tirzepatide nor semaglutide increased the risk of serious adverse events or severe hypoglycaemia.\"\n    },\n    {\n      \"pmid\": \"34894326\",\n      \"supportingSentence\": \"Overall, semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33).\"\n    },\n    {\n      \"pmid\": \"34894326\",\n      \"supportingSentence\": \"Subgroup analysis showed that semaglutide was associated with an increased risk of DR compared with placebo (RR 1.24, 95% CI 1.03-1.50).\"\n    }\n  ]\n}\n```"
     },
-    "sha256": "64839e0ef81c129b64b8906b990c6c451d09b6971729fa4f8aa8a7d75420dd9c"
+    "sha256": "41deb4fbd65d7bf72339d886f58ba5eb32ce38848c2ddb063a477bb0777fab22"
   },
   "confidentialAttestation": {
     "provider": "chainlink-confidential-ai",
     "model": "gemma4",
     "enclave": "aws-nitro",
-    "contentDigest": "414531d4fb81b6511aa7334afb278180c14ba49bb1be292c5ecd0a76eab21247",
+    "contentDigest": "980ba4bb9bdac7ecf60bfa2f7734929475540e72c22c2f795bfa745cb080e73f",
     "requestDigest": "51ada1381f6eb0292ce546d26189fae0a2b424fd98ebf8b4da1527a50545f410",
-    "responseDigest": "aa1736f86b412220fbeac71e3899a9e6015a4414395f6fe3b97a5c7c25b93ffe",
-    "output": "Based on the confidential, synthetic data provided, here is a summary of the results for semaglutide in the context of type 2 diabetes with established cardiovascular disease:\n\n**Disclaimer:** This document contains synthetic, fabricated data created solely for demonstration purposes and is under strict embargo. It is not real trial data.\n\n**Study Overview:**\n*   **Study:** MER-T2D-301 (\"HORIZON-T2D\").\n*   **Compound:** Investigational extended-dose semaglutide.\n*   **Indication:** Type 2 diabetes mellitus in adults who also have established atherosclerotic cardiovascular disease.\n*   **Design:** A Phase 3, randomized, double-blind, placebo-controlled trial involving 2,148 adults.\n\n**Efficacy Results:**\n\n*   **Primary Endpoint (HbA1c Change at Week 52):**\n    *   The semaglutide treatment group showed a reduction of **-1.8%** from baseline.\n    *   The placebo group showed a reduction of **-0.3%**.\n    *   The treatment difference was **-1.5%** (highly statistically significant, p < 0.001).\n*   **Key Secondary Endpoints:**\n    *   **Body Weight:** Semaglutide resulted in a significant average weight loss of **-11.2 kg**, compared to -1.4 kg in the placebo group (a difference of -9.8 kg, p < 0.001).\n    *   **Cardiovascular Outcomes (3-point MACE):** The treatment was associated with a reduced risk of major adverse cardiovascular events (CV death, nonfatal MI, nonfatal stroke), with a Hazard Ratio (HR) of **0.74** (p = 0.003).\n    *   **Goal Attainment:** **68%** of patients on semaglutide achieved an HbA1c of less than 7.0%, compared to 21% in the placebo group.\n\n**Safety Profile:**\n\n*   **Gastrointestinal (GI) AEs:** Gastrointestinal adverse events (including nausea, vomiting, diarrhea) were reported more frequently in the semaglutide group (41% vs 16% in placebo). However, these were mostly described as mild-to-moderate and transient.\n*   **Serious Adverse Events (SAEs):** There was no significant difference in the incidence of serious adverse events between the two arms (9.1% vs 9.8%).\n*   **Overall:** No new safety signals were noted, and rates of pancreatitis and medullary thyroid events were reported as low and balanced across both groups."
+    "responseDigest": "0928e23a71db2a006c1dc342af51ebadb9a253c178dedbc396132c965b5bd1fa",
+    "output": "```json\n{\n  \"chapter\": \"# Clinical Value and Payer Perspective: Semaglutide in Type 2 Diabetes\\n\\nSemaglutide, a potent once-weekly glucagon-like peptide-1 receptor agonist (GLP-1 RA), represents a significant advancement in the management of type 2 diabetes mellitus (T2DM) by offering comprehensive benefits in glycemic control, weight management, and cardiovascular risk reduction. Its mechanism of action involves stimulating insulin secretion and decreasing appetite [PMID 30615985].\\n\\n## Efficacy in Glycemic and Weight Control\\n\\nClinical data demonstrate that semaglutide is highly effective in achieving and sustaining glycemic targets. Compared with placebo, subcutaneous semaglutide 0.5 and 1 mg reduced HbA1c by 1.01% (95% CI, 0.56-1.47) and 1.38% (1.05-1.70), respectively [PMID 29756388]. Furthermore, semaglutide consistently demonstrated superior and sustained glycemic control and weight loss vs. all comparators evaluated [PMID 30615985]. \\n\\nIn terms of weight loss, semaglutide demonstrates a beneficial effect on body weight (mean difference vs placebo -4.11 kg, 95% CI -4.85 to -3.37 for semaglutide 1 mg) and systolic blood pressure [PMID 29756388]. While some direct comparative studies indicate that tirzepatide demonstrates a higher impact on weight loss than semaglutide [PMID 40184508], semaglutide itself provides clinically meaningful reductions in body mass index [PMID 30615985].\\n\\n## Cardiovascular and Metabolic Outcomes\\n\\nOne of the most critical values of semaglutide for payers is its demonstrated cardiovascular benefit. In trials involving patients at high risk of cardiovascular disease, semaglutide significantly decreased the occurrence of cardiovascular events compared with placebo/standard of care (hazard ratio 0.74, P<0.001 for non-inferiority) [PMID 30615985]. This benefit is further reinforced by its role in lowering blood pressure and facilitating overall metabolic health [PMID 29756388].\\n\\n## Safety and Tolerability Profile\\n\\nSemaglutide is generally well-tolerated, though it is associated with gastrointestinal adverse events [PMID 29756388]. The most frequently reported adverse event in some studies were gastrointestinal disorders, which were also the most common reason for discontinuing treatment [PMID 29397376]. \\n\\nRegarding serious adverse events, neither tirzepatide nor semaglutide increased the risk of serious adverse events or severe hypoglycaemia [PMID 38613667]. While meta-analyses indicate that overall semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33) [PMID 34894326], caution is warranted, as subgroup analysis showed that semaglutide was associated with an increased risk of DR compared with placebo (RR 1.24, 95% CI 1.03-1.50) [PMID 34894326].\\n\\n## Conclusion\\n\\nSemaglutide provides a robust clinical profile in T2DM management, offering superior and sustained glycemic and weight control, alongside proven benefits in cardiovascular risk reduction. Its established safety profile allows it to be a cornerstone therapy for patients requiring improved long-term metabolic health.\",\n  \"citations\": [\n    {\n      \"pmid\": \"30615985\",\n      \"supportingSentence\": \"Semaglutide consistently demonstrated superior and sustained glycemic control and weight loss vs. all comparators evaluated.\"\n    },\n    {\n      \"pmid\": \"29756388\",\n      \"supportingSentence\": \"Compared with placebo, subcutaneous semaglutide 0.5 and 1 mg reduced HbA1c by 1.01% (95% CI, 0.56-1.47) and 1.38% (1.05-1.70), respectively.\"\n    },\n    {\n      \"pmid\": \"30615985\",\n      \"supportingSentence\": \"Semaglutide also decreases energy intake by reducing appetite and food cravings, and lowering relative preference for fatty, energy-dense foods.\"\n    },\n    {\n      \"pmid\": \"30615985\",\n      \"supportingSentence\": \"In SUSTAIN 6, involving patients at high risk of cardiovascular disease, semaglutide significantly decreased the occurrence of cardiovascular events compared with placebo/standard of care (hazard ratio 0.74, P<0.001 for non-inferiority).\"\n    },\n    {\n      \"pmid\": \"29756388\",\n      \"supportingSentence\": \"Semaglutide also had a beneficial effect on body weight (mean difference vs placebo -4.11 kg, 95% CI -4.85 to -3.37 for semaglutide 1 mg) and systolic blood pressure.\"\n    },\n    {\n      \"pmid\": \"29397376\",\n      \"supportingSentence\": \"Gastrointestinal disorders were the most frequently reported adverse event, occurring in 129 (43%) of 301 patients receiving semaglutide 0.5 mg, 133 (44%) of 300 patients receiving semaglutide 1.0 mg, 100 (33%) of 299 patients receiving dulaglutide 0.75 mg, and in 143 (48%) of 299 patients receiving dulaglutide 1.5 mg.\"\n    },\n    {\n      \"pmid\": \"38613667\",\n      \"supportingSentence\": \"Both drugs increased incidence of gastrointestinal adverse events compared with placebo, while neither tirzepatide nor semaglutide increased the risk of serious adverse events or severe hypoglycaemia.\"\n    },\n    {\n      \"pmid\": \"34894326\",\n      \"supportingSentence\": \"Overall, semaglutide was not associated with increased DR risk compared with controls when all trials were combined (RR 1.14, 95% CI 0.98-1.33).\"\n    },\n    {\n      \"pmid\": \"34894326\",\n      \"supportingSentence\": \"Subgroup analysis showed that semaglutide was associated with an increased risk of DR compared with placebo (RR 1.24, 95% CI 1.03-1.50).\"\n    }\n  ]\n}\n```"
   }
 }

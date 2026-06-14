@@ -1,0 +1,37 @@
+CONFIDENTIAL — PROPRIETARY ECONOMIC MODEL
+SYNTHETIC DATA — FABRICATED FOR DEMONSTRATION ONLY. NOT A REAL ECONOMIC ANALYSIS. DO NOT CITE.
+
+Prepared by: Market Access & HEOR, Calderon Cardio (fictional)
+Asset: empagliflozin
+Indication: heart failure with reduced ejection fraction (HFrEF)
+Document: Internal cost-effectiveness and budget-impact summary — confidential, pre-submission.
+
+MODEL OVERVIEW
+Markov cohort model, lifetime horizon, UK NHS payer perspective. Comparator: standard of care
+(ACE inhibitor / ARB + beta-blocker + MRA). Discount rate 3.5%. Health states: NYHA class II-IV,
+heart-failure hospitalization, death.
+
+KEY EFFICACY INPUTS (pooled trial evidence)
+  Heart-failure hospitalization hazard ratio:   0.69 vs standard of care
+  Cardiovascular death hazard ratio:             0.92
+  Mean delay to first event:                     7.4 months
+
+COST-EFFECTIVENESS RESULTS (base case)
+  Incremental QALYs:                             0.34
+  Incremental cost:                              GBP 4,180
+  ICER (cost per QALY gained):                   GBP 12,294
+  Probability cost-effective at GBP 20,000/QALY threshold: 84%
+
+BUDGET IMPACT (5-year, hypothetical 50,000-patient population)
+  Net budget impact:                             GBP 61.2M
+  Offsetting hospitalization savings:            GBP 38.7M
+  Net cost per patient per year:                 ~GBP 245
+
+KEY ASSUMPTIONS AND SENSITIVITIES
+  Results most sensitive to hospitalization cost (GBP 3,100/event) and treatment persistence
+  (82% at one year). A scenario removing the cardiovascular-death benefit raises the ICER to
+  GBP 18,600/QALY, still below the threshold.
+
+CONFIDENTIAL — PROPRIETARY
+Internal pre-submission model. Do not share externally. This is fabricated synthetic data created
+solely to demonstrate confidential-document handling and contains no real analysis or data.

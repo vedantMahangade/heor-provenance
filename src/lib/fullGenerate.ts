@@ -1,41 +1,55 @@
 /**
- * The full end-to-end generate flow as a single reusable function, shared by the
- * CLI (scripts/generate-full.ts) and the /api/generate route so both run the
- * exact same path: PubMed-grounded draft -> optional confidential attestation
- * (attached BEFORE hashing) -> content-addressed bundle -> Walrus -> ENS.
+ * Full cited-GVD-chapter loop, shared by the CLI (scripts/generate-full.ts) and
+ * the /api/generate route so both run the exact same path:
  *
- * Emits coarse progress events via onProgress so a UI can show staged states
- * across the 1-2 minute run. SERVER-SIDE ONLY (reads the ENS key from env).
+ *   parse source doc -> fetch PubMed abstracts -> draft a cited chapter in the
+ *   confidential enclave (two models, keep the more accurate) -> INDEPENDENTLY
+ *   verify every inline [PMID] -> content-addressed bundle -> Walrus -> ENS.
+ *
+ * The confidential source document is parsed server-side and fed ONLY to the
+ * enclave — it never reaches a public LLM. Emits coarse progress events so a UI
+ * can show staged states across the ~1-3 minute run. SERVER-SIDE ONLY.
  */
-import { generateEvidenceBundle, type GenerateResult } from "./pipeline";
-import { analyzeConfidential, buildConfidentialAttestation } from "./confidential";
+import { searchAndFetch } from "./pubmed";
+import { parseDocument } from "./docparse";
+import { generateBestChapter } from "./chapter";
+import { buildConfidentialAttestation } from "./confidential";
 import { bundleSha256 } from "./hash";
 import { storeBlob, blobUrl } from "./walrus";
 import { writeProvenance } from "./ens";
-import type { EvidenceBundle } from "./types";
+import { AGENT_VERSION } from "./version";
+import type { Claim, EvidenceBundle, Source } from "./types";
 
-export const BASE_CAPABILITIES =
-  "pubmed-grounded-drafting,claim-level-verification,walrus-storage,sha256-provenance";
+export const CAPABILITIES =
+  "pubmed-evidence,confidential-chapter-drafting,citation-level-verification," +
+  "walrus-storage,sha256-provenance,confidential-ai-attestation";
 
-export interface SensitiveInput {
+/** The mandatory source document for a run. */
+export interface SourceInput {
   document: Uint8Array | string;
   filename: string;
   contentType: string;
-  prompt?: string;
-  model?: string;
 }
 
 export interface FullGenerateOptions {
   drug: string;
   indication: string;
+  /** Optional GVD section the chapter targets (e.g. "Clinical value, payer-facing"). */
+  focus?: string;
   query?: string;
   maxSources?: number;
-  /** When present, runs a confidential-enclave attestation over the document. */
-  sensitive?: SensitiveInput;
+  /** REQUIRED: the source document the chapter is drafted from. */
+  source: SourceInput;
+  /**
+   * Enclave models to draft with. Omit to honor ENCLAVE_SINGLE_MODEL (env) and
+   * otherwise race both models; pass an explicit list to force a specific set
+   * (export-sample.ts passes both to always produce a dual-model sample).
+   */
+  models?: readonly string[];
   onProgress?: (event: ProgressEvent) => void;
 }
 
-export type ProgressStep = "draft" | "confidential" | "walrus" | "ens";
+export type ProgressStep = "pubmed" | "chapter" | "walrus" | "ens";
 
 export interface ProgressEvent {
   step: ProgressStep;
@@ -50,7 +64,12 @@ export interface FullGenerateResult {
   ensName: string;
   resolver: string;
   txs: { key: string; value: string; hash: string }[];
-  stats: GenerateResult["stats"];
+  stats: {
+    sourcesFetched: number;
+    citations: number;
+    citationsVerified: number;
+    model: string;
+  };
   query: string;
 }
 
@@ -59,63 +78,111 @@ export async function runFullGenerate(
 ): Promise<FullGenerateResult> {
   const emit = opts.onProgress ?? (() => {});
 
-  // 1. Grounded bundle (PubMed + LLM + verification).
-  emit({ step: "draft", status: "start" });
-  const { bundle, query, stats } = await generateEvidenceBundle({
+  // 0. Parse the (mandatory) confidential source document server-side.
+  const parsed = await parseDocument(
+    typeof opts.source.document === "string"
+      ? new TextEncoder().encode(opts.source.document)
+      : opts.source.document,
+    opts.source.filename,
+    opts.source.contentType,
+  );
+
+  // 1. Real PubMed evidence.
+  emit({ step: "pubmed", status: "start" });
+  const query = opts.query ?? `${opts.drug} ${opts.indication}`;
+  const fetched = await searchAndFetch(query, { retmax: opts.maxSources ?? 8 });
+  const sources = fetched.filter((s) => s.abstract.trim().length > 0);
+  if (sources.length === 0) {
+    throw new Error(`No PubMed abstracts found for "${query}".`);
+  }
+  emit({ step: "pubmed", status: "done", detail: `${sources.length} abstracts` });
+
+  // 2. Draft the cited chapter in the enclave (two models) and INDEPENDENTLY
+  //    verify every citation; keep the more accurate model.
+  emit({ step: "chapter", status: "start" });
+  const { winner } = await generateBestChapter({
     drug: opts.drug,
     indication: opts.indication,
-    query: opts.query,
-    maxSources: opts.maxSources,
+    focus: opts.focus,
+    sources,
+    confidentialText: parsed.text,
+    filename: parsed.filename,
+    contentType: opts.source.contentType,
+    models: opts.models,
   });
   emit({
-    step: "draft",
+    step: "chapter",
     status: "done",
-    detail: `${stats.claimsGrounded} grounded / ${stats.claimsFlagged} flagged from ${stats.sourcesFetched} sources`,
+    detail: `${winner.model}: ${winner.verifiedCount}/${winner.totalCitations} citations verified`,
   });
 
-  // 2. Optional confidential attestation — attached BEFORE hashing so the
-  //    sha256 (and thus blobId + ENS pin) covers it.
-  let finalBundle: EvidenceBundle = bundle;
-  let capabilities = BASE_CAPABILITIES;
-  if (opts.sensitive) {
-    emit({ step: "confidential", status: "start" });
-    const result = await analyzeConfidential({
-      document: opts.sensitive.document,
-      filename: opts.sensitive.filename,
-      contentType: opts.sensitive.contentType,
-      prompt:
-        opts.sensitive.prompt ??
-        `Summarize this document as it relates to ${opts.drug} for ${opts.indication}.`,
-      model: opts.sensitive.model,
-    });
-    const { sha256: _omit, ...rest } = bundle;
-    const withAttestation = {
-      ...rest,
-      confidentialAttestation: buildConfidentialAttestation(result),
-    };
-    finalBundle = { ...withAttestation, sha256: bundleSha256(withAttestation) };
-    capabilities = `${BASE_CAPABILITIES},confidential-ai-attestation`;
-    emit({ step: "confidential", status: "done", detail: `${result.model} (aws-nitro)` });
-  }
+  // 3. Content-address the bundle (chapter + verified citations + cited sources +
+  //    the winning enclave's attestation).
+  const citedPmids = new Set(winner.claims.map((c) => c.pmid));
+  const citedSources = sources.filter((s) => citedPmids.has(s.pmid));
+  const bundle = assembleBundle({
+    drug: opts.drug,
+    indication: opts.indication,
+    focus: opts.focus,
+    chapter: winner.chapter,
+    claims: winner.claims,
+    sources: citedSources.length ? citedSources : sources,
+    model: winner.model,
+    attestation: buildConfidentialAttestation(winner.attestation),
+    timestamp: new Date().toISOString(),
+  });
 
-  // 3. Store on Walrus (pins >=5 epochs).
+  // 4. Store on Walrus (pins >=5 epochs).
   emit({ step: "walrus", status: "start" });
-  const blobId = await storeBlob(JSON.stringify(finalBundle));
+  const blobId = await storeBlob(JSON.stringify(bundle));
   emit({ step: "walrus", status: "done", detail: blobId });
 
-  // 4. Pin provenance into ENS text records.
+  // 5. Pin provenance into ENS text records.
   emit({ step: "ens", status: "start" });
-  const ens = await writeProvenance(blobId, finalBundle.version, capabilities);
+  const ens = await writeProvenance(blobId, bundle.version, CAPABILITIES);
   emit({ step: "ens", status: "done", detail: ens.name });
 
   return {
-    bundle: finalBundle,
+    bundle,
     blobId,
     aggregatorUrl: blobUrl(blobId),
     ensName: ens.name,
     resolver: ens.resolver,
     txs: ens.txs.map((t) => ({ key: t.key, value: t.value, hash: t.hash })),
-    stats,
+    stats: {
+      sourcesFetched: sources.length,
+      citations: winner.totalCitations,
+      citationsVerified: winner.verifiedCount,
+      model: winner.model,
+    },
     query,
   };
+}
+
+function assembleBundle(args: {
+  drug: string;
+  indication: string;
+  focus?: string;
+  chapter: string;
+  claims: Claim[];
+  sources: Source[];
+  model: string;
+  attestation: EvidenceBundle["confidentialAttestation"];
+  timestamp: string;
+}): EvidenceBundle {
+  const query = args.focus
+    ? { drug: args.drug, indication: args.indication, focus: args.focus }
+    : { drug: args.drug, indication: args.indication };
+  const withoutHash = {
+    query,
+    chapter: args.chapter,
+    claims: args.claims,
+    sources: args.sources,
+    model: args.model,
+    version: AGENT_VERSION,
+    timestamp: args.timestamp,
+    confidentialAttestation: args.attestation,
+  };
+  const sha256 = bundleSha256(withoutHash);
+  return { ...withoutHash, sha256 };
 }

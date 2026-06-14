@@ -11,8 +11,9 @@
  *   { type: "error", message }
  * Streaming keeps the connection alive across the 1-2 minute run.
  */
-import { runFullGenerate, type SensitiveInput } from "@/lib/fullGenerate";
+import { runFullGenerate, type SourceInput } from "@/lib/fullGenerate";
 import { getFeatureConfig } from "@/lib/featureConfig";
+import { docKindFor } from "@/lib/docparse";
 
 // viem / openai / node:crypto require the Node runtime (not edge). Allow up to
 // 5 minutes for the full PubMed + LLM + confidential + Walrus + ENS flow.
@@ -23,12 +24,10 @@ export const dynamic = "force-dynamic";
 const CONTENT_TYPES: Record<string, string> = {
   txt: "text/plain",
   md: "text/markdown",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  pdf: "application/pdf",
   json: "application/json",
   csv: "text/csv",
-  pdf: "application/pdf",
-  png: "image/png",
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
 };
 
 function contentTypeFor(filename: string, fallback?: string): string {
@@ -59,6 +58,7 @@ export async function POST(req: Request) {
 
   const drug = String(form.get("drug") ?? "").trim();
   const indication = String(form.get("indication") ?? "").trim();
+  const focus = String(form.get("focus") ?? "").trim() || undefined;
   const maxRaw = form.get("max");
   const maxSources = maxRaw ? Number(maxRaw) : undefined;
 
@@ -66,18 +66,26 @@ export async function POST(req: Request) {
     return Response.json({ error: "drug and indication are required." }, { status: 400 });
   }
 
-  let sensitive: SensitiveInput | undefined;
-  const file = form.get("sensitive");
-  if (file && file instanceof File && file.size > 0) {
-    const document = new Uint8Array(await file.arrayBuffer());
-    sensitive = {
-      document,
-      filename: file.name || "document",
-      contentType: contentTypeFor(file.name || "", file.type),
-      prompt: (form.get("prompt") as string) || undefined,
-      model: (form.get("model") as string) || undefined,
-    };
+  // The source document is mandatory: the chapter is drafted FROM it.
+  const file = form.get("source") ?? form.get("sensitive");
+  if (!(file instanceof File) || file.size === 0) {
+    return Response.json(
+      { error: "A source document (.docx, .pdf, or .txt) is required." },
+      { status: 400 },
+    );
   }
+  const contentType = contentTypeFor(file.name || "", file.type);
+  if (!docKindFor(file.name || "", contentType)) {
+    return Response.json(
+      { error: `Unsupported file type "${file.name}". Upload a .docx, .pdf, or .txt.` },
+      { status: 400 },
+    );
+  }
+  const source: SourceInput = {
+    document: new Uint8Array(await file.arrayBuffer()),
+    filename: file.name || "source-document",
+    contentType,
+  };
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -87,8 +95,9 @@ export async function POST(req: Request) {
         const data = await runFullGenerate({
           drug,
           indication,
+          focus,
           maxSources: Number.isFinite(maxSources) ? maxSources : undefined,
-          sensitive,
+          source,
           onProgress: (event) => send({ type: "progress", ...event }),
         });
         send({ type: "result", data });
