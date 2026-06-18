@@ -34,7 +34,9 @@ flowchart TD
     B --> D["Chainlink enclave drafts the chapter with inline PMID citations"]
     C --> D
     D --> E["Check each citation against its abstract: verified or flagged"]
-    E --> F["Hash the bundle"]
+    D --> J["Enclave returns attestation digests: content, request, response"]
+    E --> F["Hash the bundle: chapter, citations, and attestation"]
+    J --> F
     F --> G["Store on Walrus, get a blob id"]
     G --> H["Publish the blob id in ENS records"]
     H --> I["Anyone resolves the name, fetches from Walrus, recomputes the hash"]
@@ -80,7 +82,7 @@ See `.env.example` for the full list and where each value comes from.
 
 ## Live demo
 
-Hosted at <your deployed url>. The Verify tab works for anyone. Generate needs the keys above and takes one to two minutes, since it waits on the enclave.
+Hosted on [Vercel](https://lineage-umber.vercel.app/). The Verify tab doesnt need keys and works for anyone. Generate needs the keys above and takes one to two minutes, since it waits on the enclave.
 
 One note on the enclave: it is a developer preview, and its availability comes and goes. If a live generation hangs, that is the preview being slow or down, not the app, and the example path stays instant regardless. Use synthetic documents only on the generate path, because the preview may log inputs.
 
